@@ -1,0 +1,1102 @@
+<!doctype html>
+<!-- Self-contained HTML example with no external runtime dependencies. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050505" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2226%22 fill=%22none%22 stroke=%22%23ff7d58%22 stroke-width=%228%22/><path d=%22M10 34 2 24l15 2z%22 fill=%22%23ffe8c3%22/></svg>" />
+    <title>Ambiguous Arrow — Perception Lab</title>
+    <style>
+:root {
+  color-scheme: dark;
+  --ink: #f3eadb;
+  --muted: #948e84;
+  --panel: #0d0d0c;
+  --panel-2: #141311;
+  --line: #2d2a26;
+  --acid: #ff7d58;
+  --warm: #ffe8c3;
+  --cool: #2947ff;
+  --focus: #ffd16d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #050505;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  background: #050505;
+  font-family: system-ui, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+select,
+input[type="range"] {
+  accent-color: var(--acid);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+a:focus-visible,
+.table-scroll:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 20;
+  left: 14px;
+  top: 12px;
+  padding: 9px 12px;
+  color: #080706;
+  background: var(--focus);
+  transform: translateY(-160%);
+  transition: transform 120ms ease;
+}
+
+.skip-link-report { left: 190px; }
+.skip-link:focus { transform: translateY(0); }
+
+.lab-shell {
+  width: min(1500px, 100%);
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 44px);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 4px 15px;
+  border-bottom: 1px solid var(--line);
+  font: 650 0.66rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.site-nav a {
+  color: #938b81;
+  text-decoration: none;
+}
+
+.site-mark { color: var(--acid) !important; letter-spacing: 0.16em; }
+
+.site-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.2vw, 32px);
+}
+
+.site-links a {
+  position: relative;
+  padding: 7px 0;
+}
+
+.site-links a:hover,
+.site-links a[aria-current="page"] { color: var(--ink); }
+
+.site-links a[aria-current="page"]::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: var(--acid);
+}
+
+.masthead {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 4px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow,
+.cue-kicker {
+  margin: 0 0 7px;
+  color: var(--acid);
+  font: 700 0.68rem/1.2 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.18em;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font: 600 clamp(2.2rem, 5vw, 3rem)/1.05 system-ui, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+  max-width: 520px;
+}
+
+.masthead-meta span {
+  padding: 7px 10px 6px;
+  border: 1px solid var(--line);
+  color: #b9b1a5;
+  font: 600 0.66rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.masthead-meta a {
+  padding: 7px 10px 6px;
+  border: 1px solid rgba(255, 125, 88, 0.55);
+  color: var(--acid);
+  font: 600 0.66rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.masthead-meta a:hover { border-color: var(--acid); color: #ffad93; }
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 365px);
+  min-height: calc(100vh - 170px);
+}
+
+.stage-column {
+  min-width: 0;
+  padding: clamp(22px, 4vw, 60px) clamp(12px, 3vw, 46px) 28px 0;
+}
+
+.stage-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #25221e;
+  background: #000;
+}
+
+#illusion-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 716 / 448;
+  background: #000;
+}
+
+.stage-readout {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  display: flex;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.44);
+  font: 600 0.62rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.transport {
+  display: grid;
+  grid-template-columns: auto minmax(105px, 0.24fr) minmax(160px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0 22px;
+}
+
+.transport button {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #11100f;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.transport button:hover {
+  border-color: #6e6258;
+  color: #fff;
+  background: #191715;
+}
+
+.transport-button {
+  min-width: 106px;
+  padding: 11px 14px;
+  text-align: left;
+}
+
+.transport-icon {
+  display: inline-block;
+  width: 22px;
+  color: var(--acid);
+}
+
+.reset-button {
+  padding: 11px 14px;
+}
+
+.scrubber-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scrubber-label output {
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.perception-cue {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 25px 26px 23px;
+  border-left: 3px solid var(--acid);
+  background: #0b0a09;
+}
+
+.perception-cue h2 {
+  margin-bottom: 5px;
+  font: 600 clamp(1.25rem, 2.2vw, 1.65rem)/1.15 system-ui, sans-serif;
+}
+
+.perception-cue p:not(.cue-kicker) {
+  max-width: 670px;
+  margin-bottom: 0;
+  color: #a7a096;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.control-panel {
+  padding: clamp(24px, 3vw, 42px) 0 30px clamp(22px, 3vw, 38px);
+  border-left: 1px solid var(--line);
+}
+
+.panel-heading {
+  padding-bottom: 18px;
+}
+
+.panel-heading h2 {
+  margin-bottom: 7px;
+  font: 600 1.5rem/1.15 system-ui, sans-serif;
+}
+
+.panel-heading > p:last-child {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.control-group {
+  padding: 18px 0 17px;
+  border-top: 1px solid var(--line);
+}
+
+.control-group h3 {
+  margin-bottom: 16px;
+  color: #d1c7b8;
+  font: 700 0.69rem/1 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.control-row,
+.select-row {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 13px;
+  color: #a9a197;
+  font-size: 0.76rem;
+}
+
+.control-row > span,
+.select-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.control-row output {
+  color: var(--ink);
+  font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+.select-row {
+  align-items: center;
+}
+
+select {
+  width: 205px;
+  max-width: 62%;
+  padding: 7px 28px 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  background: #11100f;
+}
+
+.legend {
+  display: grid;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: #837d75;
+  font-size: 0.7rem;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.legend i {
+  display: inline-block;
+  width: 22px;
+  height: 5px;
+}
+
+.legend .warm { background: var(--warm); }
+.legend .cool { background: var(--cool); }
+.legend .seam { background: var(--acid); }
+
+.field-report {
+  padding: clamp(54px, 7vw, 92px) 4px clamp(60px, 8vw, 104px);
+  border-top: 1px solid var(--line);
+}
+
+.report-hero {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
+  gap: clamp(32px, 7vw, 112px);
+  padding-bottom: clamp(34px, 5vw, 58px);
+}
+
+.report-hero .eyebrow {
+  align-self: start;
+  padding-top: 0.6em;
+}
+
+.report-hero h2 {
+  max-width: 72ch;
+  margin-bottom: 24px;
+  font: 600 clamp(2rem, 5vw, 3rem)/1.08 system-ui, sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.report-lede {
+  max-width: 68ch;
+  margin-bottom: 0;
+  padding-left: 22px;
+  border-left: 3px solid var(--acid);
+  color: #c9c0b5;
+  font: 400 clamp(1rem, 1.5vw, 1.2rem)/1.62 system-ui, sans-serif;
+}
+
+.fact-strip {
+  display: block;
+  max-width: 72ch;
+  margin: 0 auto clamp(48px, 7vw, 84px);
+  border-top: 1px solid var(--line);
+}
+
+.fact-strip > div {
+  display: grid;
+  grid-template-columns: minmax(9rem, 12rem) 1fr;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fact-strip > div:last-child { border-right: 0; }
+
+.fact-strip dt,
+.report-toc p,
+.section-number,
+.callout-label,
+.interpretation-pair span,
+.design-rules span {
+  color: var(--acid);
+  font: 700 0.67rem/1.35 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.fact-strip dd {
+  margin: 0;
+  color: var(--ink);
+  font: 500 0.95rem/1.35 system-ui, sans-serif;
+}
+
+.report-layout {
+  display: grid;
+  grid-template-columns: minmax(175px, 235px) minmax(0, 920px);
+  justify-content: center;
+  gap: clamp(38px, 7vw, 112px);
+}
+
+.report-body,
+.report-toc {
+  min-width: 0;
+}
+
+.report-toc {
+  position: sticky;
+  top: 28px;
+  display: grid;
+  align-self: start;
+  border-top: 1px solid var(--line);
+}
+
+.report-toc p {
+  margin: 0;
+  padding: 17px 0 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.report-toc a {
+  padding: 11px 4px;
+  border-bottom: 1px solid rgba(45, 42, 38, 0.72);
+  color: #8f887f;
+  font: 500 0.72rem/1.3 "SFMono-Regular", Consolas, monospace;
+  text-decoration: none;
+}
+
+.report-toc a:hover { color: var(--ink); }
+
+.report-section {
+  padding: 0 0 clamp(66px, 8vw, 108px);
+  scroll-margin-top: 28px;
+}
+
+.section-number { margin-bottom: 17px; }
+
+.report-section h3 {
+  max-width: 830px;
+  margin-bottom: 25px;
+  font: 600 clamp(1.7rem, 4vw, 2.7rem)/1.08 system-ui, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.report-section h4 {
+  margin: 0 0 14px;
+  font: 600 1.35rem/1.15 system-ui, sans-serif;
+}
+
+.report-body > .report-section > p:not(.section-number),
+.report-callout p,
+.interpretation-pair p,
+.try-panel li,
+.design-rules p,
+.source-list li {
+  max-width: 72ch;
+  color: #b9b1a7;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.report-body code {
+  padding: 0.1em 0.3em;
+  color: #ffd5c6;
+  background: #171310;
+  font-size: 0.86em;
+}
+
+.report-callout {
+  max-width: 790px;
+  margin: 38px 0 0;
+  padding: 24px 28px 23px;
+  border-left: 3px solid var(--acid);
+  background: #0b0a09;
+}
+
+.report-callout .callout-label { margin-bottom: 8px; }
+.report-callout p:last-child { margin-bottom: 0; }
+
+.table-scroll {
+  max-width: 900px;
+  margin: 0 0 28px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.report-body table {
+  width: 100%;
+  min-width: 580px;
+  border-collapse: collapse;
+  color: #b9b1a7;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.report-body th,
+.report-body td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.report-body thead th {
+  color: var(--acid);
+  font: 700 0.68rem/1.2 "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.report-body tbody th {
+  width: 32%;
+  color: #e3d8c8;
+  font-weight: 600;
+}
+
+.interpretation-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 34px 0;
+  border-block: 1px solid var(--line);
+}
+
+.interpretation-pair > div {
+  padding: 24px;
+  border-right: 1px solid var(--line);
+}
+
+.interpretation-pair > div:nth-child(2) { border-right: 0; }
+
+.interpretation-pair strong {
+  display: block;
+  margin: 10px 0 7px;
+  color: var(--ink);
+  font: 600 1.2rem/1.2 system-ui, sans-serif;
+}
+
+.interpretation-pair p { margin-bottom: 0; font-size: 0.9rem; }
+
+.interpretation-pair figcaption {
+  grid-column: 1 / -1;
+  padding: 12px 24px;
+  border-top: 1px solid var(--line);
+  color: #7f786f;
+  font-size: 0.76rem;
+}
+
+.try-panel {
+  margin-top: 42px;
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid var(--line);
+  background: #0b0a09;
+}
+
+.try-panel ol { margin: 0; padding-left: 1.25em; }
+.try-panel li { padding-left: 0.45em; margin-bottom: 7px; }
+.try-panel li:last-child { margin-bottom: 0; }
+
+.design-rules {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 34px;
+  border-top: 1px solid var(--line);
+}
+
+.design-rules > div {
+  padding: 24px 24px 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.design-rules > div:nth-child(odd) {
+  padding-right: 30px;
+  border-right: 1px solid var(--line);
+}
+
+.design-rules > div:nth-child(even) { padding-left: 30px; }
+.design-rules p { margin: 8px 0 0; font-size: 0.9rem; }
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.report-actions a,
+.source-list a {
+  color: #f0c3b3;
+  text-decoration-color: rgba(255, 125, 88, 0.55);
+  text-underline-offset: 0.22em;
+}
+
+.report-actions a {
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.report-actions a:hover { border-color: var(--acid); color: #fff; }
+
+.sources-section { padding-bottom: 0; }
+.source-list { margin: 0; padding-left: 1.15em; }
+.source-list li { margin-bottom: 9px; }
+
+@media (max-width: 980px) {
+  .workspace { grid-template-columns: 1fr; }
+  .stage-column { padding-right: 0; }
+  .control-panel { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
+  .control-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 24px; }
+  .panel-heading, .legend { grid-column: 1 / -1; }
+  .report-layout { grid-template-columns: 1fr; }
+  .report-toc {
+    position: static;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+  }
+  .report-toc p { display: none; }
+  .report-toc a { flex: 0 0 auto; padding: 13px 16px 13px 0; margin-right: 18px; border-bottom: 0; }
+}
+
+@media (max-width: 680px) {
+  .lab-shell { padding: 16px; }
+  .site-nav { display: block; padding-bottom: 12px; }
+  .site-links {
+    margin-top: 11px;
+    gap: 22px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+  .site-links a { flex: 0 0 auto; }
+  .masthead { align-items: start; }
+  .masthead-meta { display: none; }
+  .workspace { min-height: auto; }
+  .stage-column { padding-top: 24px; }
+  .transport { grid-template-columns: auto 1fr; }
+  .transport #time-scrubber { grid-column: 1 / -1; grid-row: 2; }
+  .reset-button { grid-column: 1 / -1; }
+  .perception-cue { display: block; padding: 20px; }
+  .control-panel { display: block; }
+  .field-report { padding-top: 72px; }
+  .report-hero { display: block; }
+  .report-hero .eyebrow { padding-top: 0; }
+  .report-hero h2 { margin-top: 24px; }
+  .report-lede { padding-left: 16px; }
+  .fact-strip > div { grid-template-columns: 8rem 1fr; gap: 12px; }
+  .report-section h3 { font-size: clamp(2rem, 10vw, 3rem); }
+  .report-body > .report-section > p:not(.section-number),
+  .report-callout p,
+  .try-panel li,
+  .source-list li { font-size: 0.98rem; line-height: 1.62; }
+  .interpretation-pair,
+  .design-rules { grid-template-columns: 1fr; }
+  .interpretation-pair > div,
+  .interpretation-pair > div:nth-child(2) { border-right: 0; border-bottom: 1px solid var(--line); }
+  .design-rules > div,
+  .design-rules > div:nth-child(odd),
+  .design-rules > div:nth-child(even) { padding: 20px 0; border-right: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <a class="skip-link" href="#illusion-canvas">Skip to interactive illusion</a>
+    <a class="skip-link skip-link-report" href="#field-report">Skip to field report</a>
+    <main class="lab-shell">
+      <nav class="site-nav" aria-label="Kinetic Illusion Workbench">
+        <a class="site-mark" href="../index.html">KINETIC ILLUSION WORKBENCH</a>
+        <div class="site-links">
+          <a href="../../starter/index.html">Starter</a>
+          <a href="./index.html" aria-current="page">Arrow lab</a>
+          <a href="../helix/index.html">DNA/RNA helix</a>
+          <a href="#field-report">Report</a>
+        </div>
+      </nav>
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">KINETIC ILLUSION WORKBENCH · STUDY 01</p>
+          <h1>Ambiguous Arrow</h1>
+        </div>
+        <div class="masthead-meta" aria-label="Reference stimulus measurements">
+          <span>6.000 s loop</span>
+          <span>orthographic</span>
+          <span>measured color field</span>
+          <a href="#field-report">Read the technical report</a>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Interactive illusion laboratory">
+        <div class="stage-column">
+          <div class="stage-frame">
+            <canvas
+              id="illusion-canvas"
+              width="716"
+              height="448"
+              role="img"
+              aria-label="A porous cylindrical arrow rotates under orthographic projection. Cream, red, and blue zones follow view-space depth; the projected motion permits two depth readings."
+            ></canvas>
+            <div class="stage-readout" aria-hidden="true">
+              <span id="phase-readout">000.0°</span>
+              <span id="fps-readout">60 fps</span>
+            </div>
+          </div>
+
+          <div class="transport" aria-label="Playback controls">
+            <button class="transport-button" id="play-toggle" type="button" aria-pressed="false">
+              <span class="transport-icon" aria-hidden="true">Ⅱ</span>
+              <span id="play-label">Pause</span>
+            </button>
+            <label class="scrubber-label" for="time-scrubber">
+              <span>phase</span>
+              <output id="time-output" for="time-scrubber">0.00 s</output>
+            </label>
+            <input id="time-scrubber" type="range" min="0" max="6" step="0.001" value="0" />
+            <button class="reset-button" id="reset-button" type="button">Reset to reference</button>
+          </div>
+
+          <aside class="perception-cue" aria-labelledby="perception-cue-title">
+            <div>
+              <p class="cue-kicker">PERCEPTION CUE</p>
+              <h2 id="perception-cue-title">The rendered motion stays unchanged.</h2>
+              <p>Decide which arc is nearer. Reassigning front and back reverses the inferred three-dimensional rotation.</p>
+            </div>
+          </aside>
+        </div>
+
+        <aside class="control-panel" aria-labelledby="controls-title">
+          <div class="panel-heading">
+            <p class="eyebrow">STIMULUS CONTROLS</p>
+            <h2 id="controls-title">Test the cues</h2>
+            <p>Change one cue at a time. Reset to reference restores the measured settings.</p>
+          </div>
+
+          <div class="control-group">
+            <h3>Motion and geometry</h3>
+            <label class="control-row" for="period-control">
+              <span>Loop period <output id="period-value">6.0 s</output></span>
+              <input id="period-control" data-setting="period" type="range" min="3" max="15" step="0.1" value="6" />
+            </label>
+            <label class="control-row" for="elevation-control">
+              <span>Camera elevation <output id="elevation-value">21.1°</output></span>
+              <input id="elevation-control" data-setting="elevation" type="range" min="5" max="42" step="0.1" value="21.1" />
+            </label>
+            <label class="control-row" for="height-control">
+              <span>Band height <output id="height-value">54 px</output></span>
+              <input id="height-control" data-setting="bandHeight" type="range" min="28" max="86" step="1" value="54" />
+            </label>
+            <label class="control-row" for="gap-control">
+              <span>Surface gap angle <output id="gap-value">16°</output></span>
+              <input id="gap-control" data-setting="gapDeg" type="range" min="8" max="64" step="1" value="16" />
+            </label>
+            <label class="control-row" for="head-control">
+              <span>Arrowhead span <output id="head-value">78°</output></span>
+              <input id="head-control" data-setting="headDeg" type="range" min="35" max="110" step="1" value="78" />
+            </label>
+          </div>
+
+          <div class="control-group">
+            <h3>Particles and color</h3>
+            <label class="control-row" for="density-control">
+              <span>Particle count <output id="density-value">6,000</output></span>
+              <input id="density-control" data-setting="particleCount" type="range" min="1200" max="9000" step="200" value="6000" />
+            </label>
+            <label class="control-row" for="glow-control">
+              <span>Bloom <output id="glow-value">45%</output></span>
+              <input id="glow-control" data-setting="glow" type="range" min="0" max="1" step="0.01" value="0.45" />
+            </label>
+            <label class="control-row" for="squeeze-control">
+              <span>Color transition compression <output id="squeeze-value">0%</output></span>
+              <input id="squeeze-control" data-setting="squeeze" type="range" min="0" max="1" step="0.01" value="0" />
+            </label>
+            <label class="select-row" for="palette-control">
+              <span>Color attachment</span>
+              <select id="palette-control" data-setting="paletteMode">
+                <option value="screen">Screen height · alternate</option>
+                <option value="material">Material-fixed color · control</option>
+                <option value="depth">View-depth field · measured fit</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="control-group">
+            <h3>Depth cues</h3>
+            <label class="control-row" for="perspective-control">
+              <span>Perspective <output id="perspective-value">0%</output></span>
+              <input id="perspective-control" data-setting="perspective" type="range" min="0" max="1" step="0.01" value="0" />
+            </label>
+            <label class="select-row" for="depth-control">
+              <span>Near/far cue</span>
+              <select id="depth-control" data-setting="depthCue">
+                <option value="none">None · reference</option>
+                <option value="gentle">Size + luminance</option>
+                <option value="strong">Strong depth bias</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="legend" aria-label="Interpretation legend">
+            <span><i class="warm"></i> Upper arc · depth assignment A</span>
+            <span><i class="cool"></i> Lower arc · depth assignment B</span>
+            <span><i class="seam"></i> Tangent · particle-density seam</span>
+          </div>
+        </aside>
+      </section>
+
+      <article class="field-report" id="field-report" aria-labelledby="report-title">
+        <header class="report-hero">
+          <p class="eyebrow">TECHNICAL REPORT · STUDY 01</p>
+          <div>
+            <h2 id="report-title">One projection permits two rotation readings.</h2>
+            <p class="report-lede">
+              The renderer uses one rotation direction. Orthographic projection hides which side is
+              nearer, so viewers can infer either of two three-dimensional rotations.
+            </p>
+          </div>
+        </header>
+
+        <dl class="fact-strip" aria-label="Source measurements and rounded renderer fit">
+          <div><dt>Frame</dt><dd>716 × 448</dd></div>
+          <div><dt>Cadence</dt><dd>30 fps</dd></div>
+          <div><dt>Exact period</dt><dd>6.000 s</dd></div>
+          <div><dt>Angular rate</dt><dd>60°/s</dd></div>
+          <div><dt>Renderer radius</dt><dd>243 px</dd></div>
+          <div><dt>Renderer elevation</dt><dd>21.1°</dd></div>
+        </dl>
+
+        <div class="report-layout">
+          <nav class="report-toc" aria-label="Field report sections">
+            <p>Report index</p>
+            <a href="#finding">01 · Finding</a>
+            <a href="#measurements">02 · Measurements</a>
+            <a href="#perception">03 · Perception</a>
+            <a href="#limits">04 · Measurement limits</a>
+            <a href="#validation">05 · Validation</a>
+            <a href="#helix">06 · DNA/RNA</a>
+            <a href="#sources">07 · Sources</a>
+          </nav>
+
+          <div class="report-body">
+            <section class="report-section" id="finding" aria-labelledby="finding-title">
+              <p class="section-number">01 · FINDING</p>
+              <h3 id="finding-title">The arrow wraps around a vertical cylinder</h3>
+              <p>
+                The reference video is 716 × 448 pixels at 30 frames per second. Its 365 frames
+                contain two complete 180-frame revolutions plus five frames.
+              </p>
+              <p>
+                The measured boundaries fit an arrow-shaped strip wrapped around a vertical cylinder.
+                The rounded renderer fit uses a 243 px radius, 54 px band height, 21.1° camera
+                elevation, and orthographic projection. Its vertically shifted inner and outer
+                boundaries match a cylindrical ribbon.
+              </p>
+              <aside class="report-callout">
+                <p class="callout-label">The red seam</p>
+                <p>
+                  The red seam occurs where the surface turns edge-on. Foreshortening compresses the
+                  persistent particles while the measured color ramp passes through orange and red.
+                </p>
+              </aside>
+            </section>
+
+            <section class="report-section" id="measurements" aria-labelledby="measurements-title">
+              <p class="section-number">02 · MEASUREMENTS</p>
+              <h3 id="measurements-title">The measurements fit a cylindrical ribbon</h3>
+              <div class="table-scroll" tabindex="0" role="region" aria-label="Measured video properties">
+                <table>
+                  <thead><tr><th scope="col">Property</th><th scope="col">Source measurement or renderer fit</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">Video</th><td>H.264, 365 frames, 12.1667 s</td></tr>
+                    <tr><th scope="row">Visual cycle</th><td>180 frames / 6.000 s</td></tr>
+                    <tr><th scope="row">Surface flow</th><td>Upper arc ≈ −8.1 px/frame; lower arc ≈ +8.1 px/frame</td></tr>
+                    <tr><th scope="row">Source ellipse</th><td>Center (364.345, 236.784), radius 242.577 px, elevation 21.32°</td></tr>
+                    <tr><th scope="row">Rounded renderer fit</th><td>Center (366, 236), radius 243 px, elevation 21.1°, band height 54 px</td></tr>
+                    <tr><th scope="row">Projection</th><td>Orthographic cylinder</td></tr>
+                    <tr><th scope="row">Particle field</th><td>Persistent texture fixed to the moving surface</td></tr>
+                    <tr><th scope="row">Color predictor</th><td>View-depth sin(φ), R² = 0.964</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                Screen height also predicts much of the color field, with R² = 0.855, because the
+                cylindrical projection couples depth and vertical position. Object height explains
+                almost none of the color variation: R² = 0.015. The reconstruction therefore uses
+                <code>t = (sin(φ) + 1) / 2</code>, with blue nearest, red near the tangents, and cream
+                farthest.
+              </p>
+            </section>
+
+            <section class="report-section" id="perception" aria-labelledby="perception-title">
+              <p class="section-number">03 · PERCEPTION</p>
+              <h3 id="perception-title">Depth reflection reverses the inferred rotation</h3>
+              <p>
+                Orthographic projection preserves image position but discards the sign of depth.
+                Reflecting the model through the image plane preserves its projected movie. The
+                reflection swaps the near and far assignments, so the inferred three-dimensional
+                rotation reverses. Vision research calls this ambiguous structure from motion or
+                kinetic depth.
+              </p>
+
+              <figure class="interpretation-pair">
+                <div>
+                  <span>Reading A</span>
+                  <strong>Upper arc assigned far</strong>
+                  <p>The observed leftward upper flow supports one rotation.</p>
+                </div>
+                <div>
+                  <span>Reading B</span>
+                  <strong>Upper arc assigned near</strong>
+                  <p>The same leftward flow supports the opposite rotation.</p>
+                </div>
+                <figcaption>Either depth assignment fits the same projected movie.</figcaption>
+              </figure>
+
+              <p>
+                The cream–red–blue field remains fixed to cylinder facing and depth while individual
+                particles travel through it. This stationary field creates the red tangent seam as each
+                material particle changes color.
+              </p>
+
+              <aside class="try-panel" aria-labelledby="try-title">
+                <p class="callout-label">VIEWING PROCEDURE</p>
+                <h4 id="try-title">Test the ambiguity</h4>
+                <ol>
+                  <li>Watch at least two complete six-second loops.</li>
+                  <li>Focus on the upper arc, then focus on the lower arc.</li>
+                  <li>Add perspective or a near/far cue. Test whether the extra depth information stabilizes one reading.</li>
+                </ol>
+              </aside>
+            </section>
+
+            <section class="report-section" id="limits" aria-labelledby="limits-title">
+              <p class="section-number">04 · MEASUREMENT LIMITS</p>
+              <h3 id="limits-title">Measurements establish structure; viewers report perception</h3>
+              <p>
+                Geometry, optical flow, color, particle persistence, and exact frame recurrence can
+                be measured directly. Those measurements distinguish a cylindrical ribbon from a
+                flat ring and a view-depth color field from a screen-height gradient.
+              </p>
+              <p>
+                Use numerical analysis to establish the two geometric readings. Ask viewers whether the
+                rotation reverses, how often it reverses, and which reading dominates.
+              </p>
+            </section>
+
+            <section class="report-section" id="validation" aria-labelledby="validation-title">
+              <p class="section-number">05 · RECONSTRUCTION VALIDATION</p>
+              <h3 id="validation-title">Validate the browser model with repeatable checks</h3>
+              <div class="table-scroll" tabindex="0" role="region" aria-label="Prototype validation checks">
+                <table>
+                  <thead><tr><th scope="col">Check</th><th scope="col">Method</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">Exact frame</th><td>Open with <code>?test</code>, then call <code>window.__ILLUSION_TEST__.setTime(t)</code>.</td></tr>
+                    <tr><th scope="row">Loop closure</th><td>Compare canvas hashes at 0 and 6 seconds.</td></tr>
+                    <tr><th scope="row">Two readings</th><td>Inspect the upper arc, then the lower arc, without changing the stimulus.</td></tr>
+                    <tr><th scope="row">Responsive layout</th><td>Check viewport widths of 320 px, 390 px, and at least 1024 px.</td></tr>
+                    <tr><th scope="row">Reduced motion</th><td>Request reduced motion and confirm that playback starts paused.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                The renderer derives phase from absolute time and uses a fixed random seed. The test
+                hook renders exact times for loop and pixel comparisons.
+              </p>
+            </section>
+
+            <section class="report-section" id="helix" aria-labelledby="helix-title">
+              <p class="section-number">06 · DNA/RNA DIRECTION</p>
+              <h3 id="helix-title">A helix couples handedness to rotation</h3>
+              <p>
+                Under orthographic projection, a rotating right-handed helix and its depth-reflected
+                left-handed helix produce the same projected positions when their three-dimensional
+                rotation signs are opposite. With signed view-depth color, pixel equality also requires
+                reversing the interpreted depth-color polarity. Perceived handedness and perceived
+                rotation direction can therefore reverse together. Viewer reports record whether the
+                perception reverses spontaneously.
+              </p>
+              <div class="design-rules">
+                <div>
+                  <span>Preserve ambiguity</span>
+                  <p>Use additive point rendering without depth sorting, perspective, shadows, fog, or depth-dependent particle size.</p>
+                </div>
+                <div>
+                  <span>Prevent false sliding</span>
+                  <p>Show both ends, limit the helix to three to five turns, and add one aperiodic marker such as a bulge or nick.</p>
+                </div>
+                <div>
+                  <span>Handle color carefully</span>
+                  <p>View-depth mode recolors particles from current view-space depth. Use the screen-height and constant-luma controls to measure how much the field biases handedness.</p>
+                </div>
+                <div>
+                  <span>Geometry represented</span>
+                  <p>The browser study represents B-DNA and A-form RNA as paired tubes with approximate pitch, rise, radius, and groove spacing.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="report-section sources-section" id="sources" aria-labelledby="sources-title">
+              <p class="section-number">07 · SOURCES AND METHOD</p>
+              <h3 id="sources-title">Primary references and measurements</h3>
+              <ul class="source-list">
+                <li><a href="https://x.com/RaminNasibov/status/2092384791899386278">Reference arrow post shared by Ramin Nasibov</a></li>
+                <li><a href="https://pubmed.ncbi.nlm.nih.gov/14761659/">Fang and He: ambiguous rotating cylinders</a></li>
+                <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4250292/">Jiang, Jiang, and Parasuraman: ambiguous rotating helices</a></li>
+                <li><a href="../helix/index.html#method-report">DNA/RNA helix method report</a></li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </article>
+    </main>
+
+    <script>
+(()=>{var R={finding:"Particle color is a function of DEPTH, not of screen position. The best single predictor is sin(phi), the component of the surface point's position along the world axis pointing away from the camera (equivalently, for a cylindrical wall, the surface-normal facing ratio n.v). R^2=0.964 for sin(phi) and 0.960 for true camera depth, against 0.855 for screen y and 0.015 for object height Z.",parameterization:{t:"0 = nearest point of the ring (camera side), 1 = farthest point",formula:"t = (sin(phi) + 1) / 2, phi = ring angle, +90 deg = far side",equivalently:"t = (depth_horizontal / R + 1) / 2 for a ring of radius R about a vertical axis"},geometry:{image_size:[716,448],ellipse_center:[364.345,236.784],semi_axis_a:242.577,semi_axis_b:88.19,camera_elevation_deg:21.32,band_height_screen_px:52.7,projection:"orthographic"},caveats:"Values are h264-decoded with yuv420p chroma subsampling; the saturated red band near t=0.5 is the worst affected and its true saturation is higher than shown. Bin means average over antialiased dot interiors, so peak particle color is a little more saturated than these numbers.",stops_even:[{t:0,sin_phi:-1,rgb:[39,68.2,162.2],hex:"#2744a2"},{t:.05,sin_phi:-.9,rgb:[39,68.2,162.2],hex:"#2744a2"},{t:.1,sin_phi:-.8,rgb:[39.5,68.7,162.7],hex:"#2845a3"},{t:.15,sin_phi:-.7,rgb:[41.9,70.9,164.9],hex:"#2a47a5"},{t:.2,sin_phi:-.6,rgb:[44.1,73.7,166.9],hex:"#2c4aa7"},{t:.25,sin_phi:-.5,rgb:[49.8,76.7,166.5],hex:"#324da6"},{t:.3,sin_phi:-.4,rgb:[75.3,82.2,157.9],hex:"#4b529e"},{t:.35,sin_phi:-.3,rgb:[140.9,83.3,115.6],hex:"#8d5374"},{t:.4,sin_phi:-.2,rgb:[160.3,78.3,98.6],hex:"#a04e63"},{t:.45,sin_phi:-.1,rgb:[177.3,73.2,83.1],hex:"#b14953"},{t:.5,sin_phi:0,rgb:[187.2,75.6,72.6],hex:"#bb4c49"},{t:.55,sin_phi:.1,rgb:[195.8,79.2,62.9],hex:"#c44f3f"},{t:.6,sin_phi:.2,rgb:[199.9,83.9,56.8],hex:"#c85439"},{t:.65,sin_phi:.3,rgb:[191.8,92.1,61],hex:"#c05c3d"},{t:.7,sin_phi:.4,rgb:[183.4,109.7,77],hex:"#b76e4d"},{t:.75,sin_phi:.5,rgb:[181.2,128.3,95.1],hex:"#b5805f"},{t:.8,sin_phi:.6,rgb:[180.6,143.3,110.7],hex:"#b58f6f"},{t:.85,sin_phi:.7,rgb:[180.1,154.7,123.7],hex:"#b49b7c"},{t:.9,sin_phi:.8,rgb:[180.1,160.9,132.3],hex:"#b4a184"},{t:.95,sin_phi:.9,rgb:[180.1,163.9,138.7],hex:"#b4a48b"},{t:1,sin_phi:1,rgb:[180.7,165.4,141.8],hex:"#b5a58e"}],stops_equal_count:[{t:.0864,sin_phi:-.8273,n:473,rgb:[39,68.2,162.2],hex:"#2744a2"},{t:.1224,sin_phi:-.7552,n:523,rgb:[40.4,69.5,163.4],hex:"#2845a3"},{t:.1392,sin_phi:-.7217,n:474,rgb:[41.7,70.3,164.3],hex:"#2a46a4"},{t:.1528,sin_phi:-.6944,n:505,rgb:[41.9,71,165],hex:"#2a47a5"},{t:.1664,sin_phi:-.6671,n:492,rgb:[42.3,71.7,165.6],hex:"#2a48a6"},{t:.1808,sin_phi:-.6384,n:525,rgb:[43.3,72.8,166.2],hex:"#2b49a6"},{t:.1959,sin_phi:-.6082,n:492,rgb:[43.8,73.4,166.8],hex:"#2c49a7"},{t:.2113,sin_phi:-.5774,n:502,rgb:[44.8,74.5,167.1],hex:"#2d4aa7"},{t:.2281,sin_phi:-.5438,n:507,rgb:[45.6,75,167.1],hex:"#2e4ba7"},{t:.2464,sin_phi:-.5072,n:517,rgb:[48.6,76.3,166.7],hex:"#314ca7"},{t:.2654,sin_phi:-.4692,n:472,rgb:[54.8,78.2,165.4],hex:"#374ea5"},{t:.2876,sin_phi:-.4248,n:507,rgb:[65.1,80.5,162.6],hex:"#4150a3"},{t:.3166,sin_phi:-.3669,n:495,rgb:[88.9,84.4,151.6],hex:"#595498"},{t:.3519,sin_phi:-.2961,n:491,rgb:[143.9,83.2,113.5],hex:"#905371"},{t:.4572,sin_phi:-.0856,n:533,rgb:[179.8,72.5,80.9],hex:"#b44851"},{t:.5864,sin_phi:.1727,n:478,rgb:[202.1,81.8,55.8],hex:"#ca5238"},{t:.646,sin_phi:.292,n:504,rgb:[192.6,90.8,60],hex:"#c15b3c"},{t:.6765,sin_phi:.3531,n:524,rgb:[186.5,100.5,67.9],hex:"#ba6444"},{t:.7012,sin_phi:.4023,n:466,rgb:[183.2,110.2,77.4],hex:"#b76e4d"},{t:.7225,sin_phi:.4451,n:514,rgb:[181.3,118.1,85.1],hex:"#b57655"},{t:.7422,sin_phi:.4844,n:511,rgb:[181,125.6,92.4],hex:"#b57e5c"},{t:.76,sin_phi:.5199,n:508,rgb:[181.4,131.7,98.6],hex:"#b58463"},{t:.7762,sin_phi:.5524,n:508,rgb:[180.9,137.1,104.2],hex:"#b58968"},{t:.7912,sin_phi:.5823,n:509,rgb:[180.9,141.7,109.2],hex:"#b58e6d"},{t:.8042,sin_phi:.6083,n:458,rgb:[180.5,144,111.4],hex:"#b5906f"},{t:.8163,sin_phi:.6325,n:508,rgb:[180.5,148,115.7],hex:"#b59474"},{t:.8285,sin_phi:.657,n:509,rgb:[180.4,150.9,119],hex:"#b49777"},{t:.8399,sin_phi:.6799,n:510,rgb:[180,152.7,121.2],hex:"#b49979"},{t:.8507,sin_phi:.7015,n:509,rgb:[180.1,154.9,123.9],hex:"#b49b7c"},{t:.8609,sin_phi:.7218,n:506,rgb:[180.2,156.7,125.9],hex:"#b49d7e"},{t:.8705,sin_phi:.741,n:507,rgb:[179.9,157.8,127.5],hex:"#b49e7f"},{t:.8793,sin_phi:.7587,n:458,rgb:[180,159.5,130.1],hex:"#b4a082"},{t:.8877,sin_phi:.7754,n:510,rgb:[180,159.8,130.4],hex:"#b4a082"},{t:.8959,sin_phi:.7917,n:509,rgb:[180.1,160.7,131.8],hex:"#b4a184"},{t:.9036,sin_phi:.8072,n:512,rgb:[180.1,161.1,132.7],hex:"#b4a185"},{t:.9109,sin_phi:.8219,n:509,rgb:[180,161.7,133.9],hex:"#b4a286"},{t:.9179,sin_phi:.8358,n:509,rgb:[180.3,162.3,134.7],hex:"#b4a287"},{t:.9241,sin_phi:.8481,n:461,rgb:[180.2,162.1,134.7],hex:"#b4a287"},{t:.9299,sin_phi:.8598,n:512,rgb:[180.1,162.8,136.2],hex:"#b4a388"},{t:.9358,sin_phi:.8717,n:512,rgb:[180.2,163.2,137],hex:"#b4a389"},{t:.9415,sin_phi:.883,n:510,rgb:[180.1,163.4,137.3],hex:"#b4a389"},{t:.9468,sin_phi:.8936,n:513,rgb:[180.3,163.7,138.2],hex:"#b4a48a"},{t:.9517,sin_phi:.9034,n:461,rgb:[180,164,138.9],hex:"#b4a48b"},{t:.9563,sin_phi:.9126,n:511,rgb:[180.5,164.1,139],hex:"#b5a48b"},{t:.9608,sin_phi:.9215,n:513,rgb:[180.1,163.9,139.1],hex:"#b4a48b"},{t:.965,sin_phi:.9299,n:515,rgb:[180.5,164.4,139.7],hex:"#b5a48c"},{t:.9687,sin_phi:.9373,n:464,rgb:[180.3,164,139.1],hex:"#b4a48b"},{t:.9721,sin_phi:.9442,n:513,rgb:[180.6,164.6,140.2],hex:"#b5a58c"},{t:.9756,sin_phi:.9511,n:518,rgb:[180.2,164.3,140.2],hex:"#b4a48c"},{t:.9788,sin_phi:.9576,n:514,rgb:[180.5,164.6,140.1],hex:"#b4a58c"},{t:.9817,sin_phi:.9634,n:468,rgb:[180.2,164.6,140.6],hex:"#b4a58d"},{t:.9844,sin_phi:.9687,n:518,rgb:[180.3,164.4,140.5],hex:"#b4a48c"},{t:.9868,sin_phi:.9735,n:520,rgb:[180.3,164.7,140.9],hex:"#b4a58d"},{t:.9889,sin_phi:.9778,n:465,rgb:[180.6,164.8,140.7],hex:"#b5a58d"},{t:.991,sin_phi:.9819,n:518,rgb:[180.1,164.7,140.7],hex:"#b4a58d"},{t:.9928,sin_phi:.9856,n:469,rgb:[180.4,165.1,141.2],hex:"#b4a58d"},{t:.9944,sin_phi:.9888,n:518,rgb:[180.7,165.2,141.3],hex:"#b5a58d"},{t:.9958,sin_phi:.9917,n:520,rgb:[180.7,165.4,141.4],hex:"#b5a58d"},{t:.997,sin_phi:.994,n:470,rgb:[180.6,165.2,141.4],hex:"#b5a58d"},{t:.9979,sin_phi:.9959,n:521,rgb:[180.5,165.4,141.6],hex:"#b5a58e"},{t:.9988,sin_phi:.9975,n:523,rgb:[180.6,165.3,141.7],hex:"#b5a58e"},{t:.9994,sin_phi:.9987,n:470,rgb:[180.3,165.1,141.5],hex:"#b4a58d"},{t:.9998,sin_phi:.9995,n:521,rgb:[180.9,165.7,141.8],hex:"#b5a68e"},{t:1,sin_phi:.9999,n:519,rgb:[180.7,165.4,141.8],hex:"#b5a58e"}]};var ht=Math.PI*2,Z=new URLSearchParams(window.location.search).has("test"),l=Object.freeze({width:716,height:448,cx:366,cy:236,radius:243}),w=R.default??R,ct=w.stops??w.stops_even??w.stops_equal_count,pt=w.stops_even?"depth":"screen",f=ct.map(t=>t.rgb),j=Object.freeze({period:6,elevation:21.1,bandHeight:54,gapDeg:16,headDeg:78,particleCount:6e3,glow:.45,squeeze:0,paletteMode:pt,perspective:0,depthCue:"none"}),a={...j},gt=document.querySelector("#illusion-canvas"),c=gt.getContext("2d",{alpha:!1,willReadFrequently:Z}),D=document.createElement("canvas");D.width=l.width;D.height=l.height;var G=D.getContext("2d",{alpha:!1}),U=G.createImageData(l.width,l.height),p=U.data,V=document.querySelector("#play-toggle"),lt=document.querySelector("#play-label"),ut=document.querySelector(".transport-icon"),P=document.querySelector("#time-scrubber"),bt=document.querySelector("#time-output"),dt=document.querySelector("#phase-readout"),J=document.querySelector("#fps-readout"),O=document.querySelector("#reticle"),K=[],A=[],o=0,g=!window.matchMedia("(prefers-reduced-motion: reduce)").matches,C=null,X=null,Y=0,L=performance.now(),k=60;function I(t){return t*Math.PI/180}function S(t,e,n){return Math.max(e,Math.min(n,t))}function m(t,e,n){return t+(e-t)*n}function ft(t){let e=t>>>0;return()=>{e+=1831565813;let n=e;return n=Math.imul(n^n>>>15,n|1),n^=n+Math.imul(n^n>>>7,n|61),((n^n>>>14)>>>0)/4294967296}}function z(){let t=I(360-a.gapDeg),e=Math.min(I(a.headDeg),t*.46);return{...l,elevation:I(a.elevation),shaftHalfHeight:a.bandHeight/2,headHalfHeight:a.bandHeight*1.26,arrowExtent:t,headSpan:e,tipAngleAtZero:I(142),colorYTop:w.y_top??122,colorYBottom:w.y_bottom??351}}function xt(t,e){let n=e.arrowExtent-e.headSpan;if(t<n)return e.shaftHalfHeight;let r=(t-n)/e.headSpan;return e.headHalfHeight*(1-r)}function F(){let t=z(),e=ft(27333904),n=[];for(;n.length<a.particleCount;){let r=e()*t.arrowExtent,i=m(-t.headHalfHeight,t.headHalfHeight,e()),s=xt(r,t);Math.abs(i)>s||n.push({id:n.length,u:r,axial:i,radius:m(.75,1.7,Math.pow(e(),1.35)),opacity:m(.72,.98,e()),jitter:e()})}K=n}function Q(t){let e=a.period;return(t%e+e)%e/e*ht}function _t(t){if(a.squeeze<=0)return t;let e=2+a.squeeze*8,n=.5+.5*Math.tanh((t-.5)*e)/Math.tanh(e*.5);return m(t,S(n,0,1),a.squeeze)}function mt(t){let e=S(t,0,1)*(f.length-1),n=Math.floor(e),r=Math.min(f.length-1,n+1),i=e-n;return[Math.round(m(f[n][0],f[r][0],i)),Math.round(m(f[n][1],f[r][1],i)),Math.round(m(f[n][2],f[r][2],i))]}function yt({screenY:t,frontness:e,materialProgress:n},r){let i;return a.paletteMode==="material"?i=n:a.paletteMode==="depth"?i=(1-e)/2:i=(t-r.colorYTop)/(r.colorYBottom-r.colorYTop),_t(S(i,0,1))}function Mt(t,e,n){let i=n.tipAngleAtZero-n.arrowExtent+t.u+e,s=Math.sin(i),b=Math.cos(i),h=-s,d=n.radius*b,x=t.axial*Math.cos(n.elevation)+n.radius*s*Math.sin(n.elevation),u=1/(1-h*a.perspective*.17),_=n.cx+d*u,v=n.cy-x*u,M=1,H=1;a.depthCue==="gentle"?(M=1+h*.16,H=1+h*.13):a.depthCue==="strong"&&(M=1+h*.35,H=1+h*.34);let E=yt({screenY:v,frontness:h,materialProgress:t.u/n.arrowExtent},n),T=mt(E),q=Math.exp(-Math.pow((E-.47)/.075,2)),it=1+.13*q,at=S(1.22*it*H,.3,1.5);return{id:t.id,u:t.u,axial:t.axial,angle:i,worldDepth:s*n.radius,frontness:h,x:_,y:v,radius:t.radius*u*M,tangentX:-s,tangentY:-b*Math.sin(n.elevation),elongation:1.18+t.jitter*.26,opacity:t.opacity,rgb:T.map((rt,N)=>{let st=N===1?1-.22*q:N===2?1-.38*q:1;return Math.round(S(rt*at*st,0,255))})}}function wt(t,e,n){p[t]=Math.round(p[t]+(e[0]-p[t])*n),p[t+1]=Math.round(p[t+1]+(e[1]-p[t+1])*n),p[t+2]=Math.round(p[t+2]+(e[2]-p[t+2])*n)}function St(t){let e=Math.max(.7,t.radius),n=Math.hypot(t.tangentX,t.tangentY)||1,r=t.tangentX/n,i=t.tangentY/n,s=Math.ceil(e*2.15*t.elongation),b=Math.round(t.x),h=Math.round(t.y);for(let d=-s;d<=s;d+=1){let x=h+d;if(!(x<0||x>=l.height))for(let u=-s;u<=s;u+=1){let _=b+u;if(_<0||_>=l.width)continue;let v=(u*r+d*i)/t.elongation,M=-u*i+d*r,H=v*v+M*M,E=Math.max(.72,e*.86),T=t.opacity*Math.exp(-H/(2*E*E))*.92;if(T<.025)continue;let q=(x*l.width+_)*4;wt(q,t.rgb,S(T,0,.96))}}}function vt(t,e){let n=e.tipAngleAtZero-e.arrowExtent,r=n+e.arrowExtent+t,i=n+e.arrowExtent-e.headSpan+t,s=(b,h=0)=>({x:e.cx+e.radius*Math.cos(b),y:e.cy-(h*Math.cos(e.elevation)+e.radius*Math.sin(b)*Math.sin(e.elevation))});return{center:s(i+e.headSpan*.47),base:s(i),baseTop:s(i,e.headHalfHeight),baseBottom:s(i,-e.headHalfHeight),tip:s(r)}}function y(t=o){let e=z(),n=Q(t);p.fill(0);for(let i=3;i<p.length;i+=4)p[i]=255;A=K.map(i=>Mt(i,n,e)),a.depthCue==="strong"&&A.sort((i,s)=>i.frontness-s.frontness);for(let i of A)St(i);G.putImageData(U,0,0),c.save(),c.fillStyle="#000",c.fillRect(0,0,l.width,l.height),a.glow>0&&(c.globalCompositeOperation="lighter",c.globalAlpha=a.glow*.68,c.filter=`blur(${1.4+a.glow*3.2}px)`,c.drawImage(D,0,0)),c.filter="none",c.globalCompositeOperation="screen",c.globalAlpha=1,c.drawImage(D,0,0),c.restore();let r=(n*180/Math.PI+360)%360;dt.textContent=`${r.toFixed(1).padStart(5,"0")}\xB0`,bt.textContent=`${t.toFixed(2)} s`,P.value=String(t)}function $(){V.setAttribute("aria-pressed",String(g)),lt.textContent=g?"Pause":"Play",ut.textContent=g?"\u2161":"\u25B6",g||(J.textContent="paused")}function W(t){C===null&&(C=t);let e=Math.min((t-C)/1e3,.1);C=t,g&&(o=(o+e)%a.period,y(o),Y+=1),g&&t-L>=700&&(k=Math.round(Y*1e3/(t-L)),J.textContent=`${k} fps`,Y=0,L=t),requestAnimationFrame(W)}function tt(t,e){return t==="period"?`${Number(e).toFixed(1)} s`:t==="elevation"?`${Number(e).toFixed(1)}\xB0`:t==="bandHeight"?`${Math.round(e)} px`:t==="gapDeg"||t==="headDeg"?`${Math.round(e)}\xB0`:t==="particleCount"?Math.round(e).toLocaleString():`${Math.round(e*100)}%`}function et(){document.querySelectorAll("[data-setting]").forEach(t=>{let e=t.dataset.setting;t.value=String(a[e]);let n=document.querySelector(`#${t.id.replace("-control","-value")}`);n&&t.type==="range"&&(n.textContent=tt(e,a[e]))}),P.max=String(a.period)}function nt(){Object.assign(a,j),o=0,F(),et(),y(o)}V.addEventListener("click",()=>{g=!g,C=null,g&&(Y=0,L=performance.now()),$(),g||y(o)});P.addEventListener("input",()=>{g=!1,$(),o=Number(P.value),y(o)});document.querySelector("#reset-button").addEventListener("click",nt);document.querySelectorAll("[data-setting]").forEach(t=>{t.addEventListener("input",()=>{let e=t.dataset.setting;a[e]=t.type==="range"?Number(t.value):t.value;let n=document.querySelector(`#${t.id.replace("-control","-value")}`);n&&t.type==="range"&&(n.textContent=tt(e,a[e])),P.max=String(a.period),o%=a.period,["bandHeight","gapDeg","headDeg","particleCount"].includes(e)&&F(),y(o)})});document.querySelectorAll("[data-prime]").forEach(t=>{t.addEventListener("click",()=>{clearTimeout(X),O.className=`reticle ${t.dataset.prime} visible`,X=setTimeout(()=>{O.className="reticle"},850)})});function B(){let t=z(),e=Q(o),n=A.filter((r,i)=>i%Math.max(1,Math.floor(A.length/12))===0).slice(0,12).map(({id:r,u:i,axial:s,worldDepth:b,frontness:h,x:d,y:x,radius:u,rgb:_})=>({id:r,u:i,axial:s,worldDepth:b,frontness:h,x:d,y:x,radius:u,rgb:_}));return{timeSeconds:o,phase:e,projection:a.perspective===0?"orthographic":"weak-perspective",paletteMode:a.paletteMode,settings:{...a},geometry:{width:t.width,height:t.height,cx:t.cx,cy:t.cy,radius:t.radius,shaftHalfHeight:t.shaftHalfHeight,headHalfHeight:t.headHalfHeight,elevation:t.elevation,arrowExtent:t.arrowExtent,headSpan:t.headSpan},head:vt(e,t),representatives:n}}Z&&(window.__ILLUSION_TEST__={setTime(t){return g=!1,$(),o=(Number(t)%a.period+a.period)%a.period,y(o),B()},getState:B,getImageData(){return c.getImageData(0,0,l.width,l.height)},reset:nt});F();et();$();y(0);requestAnimationFrame(W);})();
+
+</script>
+  </body>
+</html>

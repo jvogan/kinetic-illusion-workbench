@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><path d=%22M8 38c12-28 36-28 48 0M8 26c12 28 36 28 48 0%22 fill=%22none%22 stroke=%22%235ea9d8%22 stroke-width=%226%22/></svg>">
+  <title>Kinetic Illusion Workbench — examples</title>
+  <style>
+    :root { color-scheme:dark; --bg:#09090b; --panel:#111114; --line:#303038;
+            --ink:#ededf2; --dim:#a0a0aa; --blue:#5ea9d8; --red:#d8735e; --cream:#d8c7a8; }
+    * { box-sizing:border-box; }
+    html { min-width:320px; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,sans-serif; }
+    header,main,footer { width:min(980px,calc(100% - 32px)); margin-inline:auto; }
+    header { padding:64px 0 28px; border-bottom:1px solid var(--line); }
+    .eyebrow { margin:0 0 8px; color:var(--blue); font-size:.72rem; font-weight:700;
+               letter-spacing:.14em; text-transform:uppercase; }
+    h1 { max-width:18ch; margin:0 0 12px; font-size:clamp(2.2rem,6vw,3.6rem);
+         line-height:1; letter-spacing:-.04em; }
+    header p { max-width:66ch; margin:0; color:var(--dim); }
+    .studies { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; padding:30px 0 52px; }
+    article { display:flex; min-width:0; flex-direction:column; border:1px solid var(--line);
+              background:var(--panel); }
+    .preview { display:grid; min-height:250px; place-items:center; padding:24px; border-bottom:1px solid var(--line);
+               background:#000; }
+    svg { display:block; width:100%; max-width:390px; height:auto; }
+    .copy { display:flex; flex:1; flex-direction:column; padding:24px; }
+    h2 { margin:0 0 8px; font-size:1.25rem; }
+    .copy p { margin:0 0 24px; color:var(--dim); }
+    .copy a { align-self:flex-start; margin-top:auto; min-height:44px; padding:9px 14px;
+              border:1px solid var(--blue); color:var(--ink); text-decoration:none; }
+    .copy a:hover { background:#171a1d; }
+    a:focus-visible { outline:2px solid #f0c878; outline-offset:3px; }
+    footer { padding:22px 0 46px; border-top:1px solid var(--line); color:var(--dim); font-size:.85rem; }
+    footer a { color:#80bfe4; }
+    @media (max-width:820px) { header { padding-top:42px; } .studies { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Kinetic Illusion Workbench</p>
+    <h1>A starter and two rotation studies</h1>
+    <p>The starter names each reusable function. Both studies keep particles fixed to rotating geometry and recompute color from current view-space depth.</p>
+  </header>
+
+  <main class="studies">
+    <article>
+      <div class="preview" aria-hidden="true">
+        <svg viewBox="0 0 420 230">
+          <ellipse cx="210" cy="115" rx="145" ry="61" fill="none" stroke="#303038" stroke-width="2"/>
+          <path d="M83 112c52-42 202-42 254 0-52 42-202 42-254 0Z" fill="none" stroke="#5ea9d8" stroke-width="13" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M94 119c65 36 182 36 232 0" fill="none" stroke="#d8c7a8" stroke-width="13" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M199 63v104M221 63v104" stroke="#d8735e" stroke-width="5" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="copy">
+        <h2>Readable starter</h2>
+        <p>Named functions separate shape sampling, carrier motion, camera transformation, projection, and signed depth color.</p>
+        <a href="../starter/index.html">Open starter</a>
+      </div>
+    </article>
+
+    <article>
+      <div class="preview" aria-hidden="true">
+        <svg viewBox="0 0 420 230">
+          <path d="M70 112c22-72 258-72 280 0-16 65-254 65-280 0Z" fill="none" stroke="#d8c7a8" stroke-width="15" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M70 118c25 63 259 63 280 0" fill="none" stroke="#2947ff" stroke-width="15" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M72 109c-12 8-23 13-38 14l20 18" fill="none" stroke="#d8735e" stroke-width="9"/>
+        </svg>
+      </div>
+      <div class="copy">
+        <h2>Rotating arrow ribbon</h2>
+        <p>A cylindrical particle ribbon uses the measured geometry and inferred view-depth color rule. Controls compare alternate color attachments.</p>
+        <a href="./arrow/index.html">Open arrow study</a>
+      </div>
+    </article>
+
+    <article>
+      <div class="preview" aria-hidden="true">
+        <svg viewBox="0 0 420 230">
+          <path d="M95 18c225 58 4 136 230 194M325 18C99 76 320 154 95 212" fill="none" stroke="#5ea9d8" stroke-width="12" stroke-dasharray="1 7" stroke-linecap="round"/>
+          <path d="M117 44h186M112 89h196M112 138h196M117 185h186" fill="none" stroke="#d8c7a8" stroke-width="6" stroke-dasharray="1 8" stroke-linecap="round"/>
+          <path d="M196 106h28" stroke="#d8735e" stroke-width="9" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="copy">
+        <h2>Ambiguous DNA/RNA helix</h2>
+        <p>A double helix uses the signed view-depth field. Its interpretation control changes the handedness label without changing the rendered pixels.</p>
+        <a href="./helix/index.html">Open helix study</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>The arrow study measures its geometry and color ramp from the animation in <a href="https://x.com/RaminNasibov/status/2092384791899386278">Ramin Nasibov's reference post</a>.</footer>
+</body>
+</html>

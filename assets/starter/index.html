@@ -1,0 +1,428 @@
+<!doctype html>
+<!-- Copy this file, then replace the marked shape or carrier functions. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09090b">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><circle cx=%2232%22 cy=%2232%22 r=%2224%22 fill=%22none%22 stroke=%22%2369acd3%22 stroke-width=%226%22/><path d=%22M8 32h48%22 stroke=%22%23d8735e%22 stroke-width=%226%22/></svg>">
+  <title>Signed view-depth illusion starter</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09090b;
+      --panel: #111114;
+      --line: #303038;
+      --ink: #ededf2;
+      --dim: #a0a0aa;
+      --accent: #69acd3;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.6 ui-sans-serif, system-ui, sans-serif;
+    }
+    a { color: #87c5e8; }
+    button {
+      min-height: 44px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      background: #17171b;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    a:focus-visible, button:focus-visible { outline: 2px solid #f0c878; outline-offset: 3px; }
+    nav, main, .report { width: min(980px, calc(100% - 28px)); margin-inline: auto; }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 15px 0 13px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+    }
+    nav div { display: flex; flex-wrap: wrap; gap: 18px; }
+    nav a { color: var(--dim); text-decoration: none; }
+    nav a:first-child { color: var(--accent); }
+    main { padding: 34px 0 48px; }
+    .heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+    .eyebrow { margin: 0 0 6px; color: var(--accent); font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }
+    h1 { max-width: 17ch; margin: 0; font-size: clamp(2rem, 6vw, 3.6rem); line-height: .98; letter-spacing: -.04em; }
+    .heading p:last-child { max-width: 40ch; margin: 0; color: var(--dim); }
+    .stage { max-width: 760px; margin-inline: auto; border: 1px solid var(--line); background: #000; }
+    canvas { display: block; width: 100%; height: auto; }
+    .transport {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+    }
+    #status { margin-left: auto; color: var(--dim); font: 12px/1.4 ui-monospace, monospace; }
+    .reading {
+      margin: 14px 0 0;
+      padding: 12px 14px;
+      border-left: 2px solid var(--accent);
+      background: var(--panel);
+      color: var(--dim);
+    }
+    .reading strong { color: var(--ink); }
+    .report {
+      max-width: 72ch;
+      padding: 40px 0 72px;
+      border-top: 1px solid var(--line);
+    }
+    .report h2 { margin: 30px 0 8px; font-size: 1.35rem; line-height: 1.25; }
+    .report h2:first-child { margin-top: 0; }
+    .report p, .report ol { color: #c7c7cf; }
+    code { color: #f0c878; font-family: ui-monospace, monospace; }
+    @media (max-width: 700px) {
+      .heading { display: block; }
+      .heading p:last-child { margin-top: 14px; }
+      #status { width: 100%; margin-left: 0; }
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      nav, .transport { display: none; }
+      .report p, .report ol, .reading { color: #333; }
+    }
+  </style>
+</head>
+<body>
+  <nav aria-label="Kinetic Illusion Workbench">
+    <a href="../examples/index.html">Kinetic Illusion Workbench</a>
+    <div>
+      <a href="../examples/arrow/index.html">Arrow</a>
+      <a href="../examples/helix/index.html">DNA/RNA</a>
+      <a href="#adapt">Adapt this starter</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="heading">
+      <div>
+        <p class="eyebrow">Readable starter</p>
+        <h1>Signed view-depth field</h1>
+      </div>
+      <p>Particles stay on the rotating material. Their display color comes from current camera-space depth.</p>
+    </div>
+
+    <section class="stage" aria-labelledby="starter-title">
+      <canvas id="canvas" width="760" height="520" role="img" aria-label="A particle glyph rotates around a vertical cylinder under a signed view-depth color field."></canvas>
+      <div class="transport">
+        <button id="play" type="button">Pause</button>
+        <button id="restart" type="button">Restart</button>
+        <button id="interpretation" type="button">Swap interpretation label</button>
+        <span id="status" aria-live="polite">0.00 turns</span>
+      </div>
+    </section>
+    <p class="reading" id="reading"><strong>Reading A:</strong> one rotation direction with the cobalt region nearer.</p>
+  </main>
+
+  <section class="report" id="adapt">
+    <h2 id="starter-title">Adapt this starter</h2>
+    <ol>
+      <li>Replace <code>SUBJECT_POLYGON</code> or <code>isInsideSubjectShape()</code> to change a wrapped silhouette.</li>
+      <li>Replace <code>materialPointToWorld()</code> when the subject needs another carrier, such as a tube, helix, or shell.</li>
+      <li>Keep <code>worldPointToView()</code> and <code>colorFromSignedViewDepth()</code> after the object transform.</li>
+    </ol>
+
+    <h2>The invariant</h2>
+    <p>Material coordinates identify each particle for the full loop. The renderer recomputes <code>view.z</code> and display color on every frame. Do not store the sampled color on the particle.</p>
+
+    <h2>Camera rule</h2>
+    <p>The starter rotates around world <code>y</code>, tilts the camera around <code>x</code>, and projects <code>view.x</code> and <code>view.y</code> orthographically. It keeps <code>view.z</code> for the color field.</p>
+  </section>
+
+  <script>
+    "use strict";
+
+    const TAU = Math.PI * 2;
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    const LOGICAL_WIDTH = 760;
+    const LOGICAL_HEIGHT = 520;
+    const PIXEL_RATIO = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(LOGICAL_WIDTH * PIXEL_RATIO);
+    canvas.height = Math.round(LOGICAL_HEIGHT * PIXEL_RATIO);
+    context.setTransform(PIXEL_RATIO, 0, 0, PIXEL_RATIO, 0, 0);
+
+    const SETTINGS = Object.freeze({
+      seed: 20260828,
+      particleCount: 3600,
+      periodSeconds: 6,
+      cylinderRadius: 2.15,
+      cameraElevationDegrees: 18,
+      pixelsPerUnit: 146,
+      centerX: LOGICAL_WIDTH / 2,
+      centerY: LOGICAL_HEIGHT / 2,
+      palettePolarity: 1
+    });
+
+    // ADAPTATION POINT 1: replace this normalized polygon with the user's shape.
+    // u runs around the cylinder from 0 to 1. v runs vertically from -0.5 to 0.5.
+    const SUBJECT_POLYGON = [
+      [0.06, -0.12], [0.52, -0.12], [0.66, -0.40], [0.92, -0.40],
+      [0.74, 0.00], [0.92, 0.40], [0.66, 0.40], [0.52, 0.12],
+      [0.06, 0.12]
+    ];
+
+    function createSeededRandom(seed) {
+      let state = seed >>> 0;
+      return function random() {
+        state += 0x6D2B79F5;
+        let value = state;
+        value = Math.imul(value ^ value >>> 15, value | 1);
+        value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+        return ((value ^ value >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function pointIsInsidePolygon(x, y, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const [xi, yi] = polygon[i];
+        const [xj, yj] = polygon[j];
+        const crosses = (yi > y) !== (yj > y) &&
+          x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+        if (crosses) inside = !inside;
+      }
+      return inside;
+    }
+
+    function isInsideSubjectShape(u, v) {
+      return pointIsInsidePolygon(u, v, SUBJECT_POLYGON);
+    }
+
+    function createMaterialParticles() {
+      const random = createSeededRandom(SETTINGS.seed);
+      const particles = [];
+      while (particles.length < SETTINGS.particleCount) {
+        const u = random();
+        const v = random() - 0.5;
+        if (!isInsideSubjectShape(u, v)) continue;
+        particles.push({
+          id: particles.length,
+          u,
+          v,
+          radius: SETTINGS.cylinderRadius,
+          dotRadius: 0.8 + random() * 1.25,
+          opacity: 0.55 + random() * 0.35
+        });
+      }
+      return particles;
+    }
+
+    // ADAPTATION POINT 2: replace this function for a different carrier.
+    function materialPointToWorld(particle, seconds) {
+      const turn = ((seconds % SETTINGS.periodSeconds) + SETTINGS.periodSeconds) % SETTINGS.periodSeconds;
+      const phase = TAU * turn / SETTINGS.periodSeconds;
+      const angle = TAU * particle.u + phase;
+      return {
+        x: particle.radius * Math.cos(angle),
+        y: particle.v,
+        z: -particle.radius * Math.sin(angle)
+      };
+    }
+
+    function worldPointToView(worldPoint) {
+      const elevation = SETTINGS.cameraElevationDegrees * Math.PI / 180;
+      const sine = Math.sin(elevation);
+      const cosine = Math.cos(elevation);
+      return {
+        x: worldPoint.x,
+        y: worldPoint.y * cosine - worldPoint.z * sine,
+        z: worldPoint.y * sine + worldPoint.z * cosine
+      };
+    }
+
+    function projectOrthographic(viewPoint) {
+      return {
+        x: SETTINGS.centerX + SETTINGS.pixelsPerUnit * viewPoint.x,
+        y: SETTINGS.centerY - SETTINGS.pixelsPerUnit * viewPoint.y
+      };
+    }
+
+    function fullCycleDepthExtent(particles) {
+      const elevation = SETTINGS.cameraElevationDegrees * Math.PI / 180;
+      const sine = Math.sin(elevation);
+      const cosine = Math.cos(elevation);
+      return particles.reduce((extent, particle) => Math.max(
+        extent,
+        Math.abs(particle.v * sine) + Math.abs(particle.radius * cosine)
+      ), 1e-6);
+    }
+
+    const PALETTE = [
+      [0.00, [39, 68, 162]],
+      [0.34, [55, 78, 165]],
+      [0.46, [177, 73, 83]],
+      [0.56, [202, 84, 57]],
+      [0.70, [183, 110, 77]],
+      [1.00, [181, 165, 142]]
+    ];
+
+    function clamp(value, minimum, maximum) {
+      return Math.max(minimum, Math.min(maximum, value));
+    }
+
+    function interpolate(a, b, amount) {
+      return a + (b - a) * amount;
+    }
+
+    function samplePalette(position) {
+      const t = clamp(position, 0, 1);
+      for (let index = 1; index < PALETTE.length; index++) {
+        const [rightPosition, rightColor] = PALETTE[index];
+        const [leftPosition, leftColor] = PALETTE[index - 1];
+        if (t > rightPosition) continue;
+        const amount = (t - leftPosition) / (rightPosition - leftPosition);
+        return leftColor.map((channel, channelIndex) =>
+          Math.round(interpolate(channel, rightColor[channelIndex], amount))
+        );
+      }
+      return PALETTE[PALETTE.length - 1][1];
+    }
+
+    function colorFromSignedViewDepth(viewDepth, depthExtent) {
+      const position = clamp(
+        0.5 - SETTINGS.palettePolarity * viewDepth / (2 * depthExtent),
+        0,
+        1
+      );
+      return { position, rgb: samplePalette(position) };
+    }
+
+    const materialParticles = createMaterialParticles();
+    const depthExtent = fullCycleDepthExtent(materialParticles);
+    let currentSeconds = 0;
+    let playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let previousTimestamp = null;
+    let interpretation = 1;
+
+    function renderFrame(seconds) {
+      currentSeconds = ((seconds % SETTINGS.periodSeconds) + SETTINGS.periodSeconds) % SETTINGS.periodSeconds;
+      context.fillStyle = "#000";
+      context.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+      context.globalCompositeOperation = "screen";
+
+      for (const particle of materialParticles) {
+        const worldPoint = materialPointToWorld(particle, currentSeconds);
+        const viewPoint = worldPointToView(worldPoint);
+        const screenPoint = projectOrthographic(viewPoint);
+        const color = colorFromSignedViewDepth(viewPoint.z, depthExtent).rgb;
+
+        context.beginPath();
+        context.arc(screenPoint.x, screenPoint.y, particle.dotRadius, 0, TAU);
+        context.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${particle.opacity})`;
+        context.fill();
+      }
+
+      context.globalCompositeOperation = "source-over";
+      document.getElementById("status").textContent =
+        `${(currentSeconds / SETTINGS.periodSeconds).toFixed(2)} turns · ${materialParticles.length} particles`;
+    }
+
+    function setPlaybackButton() {
+      document.getElementById("play").textContent = playing ? "Pause" : "Play";
+    }
+
+    function setInterpretationLabel() {
+      const reading = interpretation > 0
+        ? "<strong>Reading A:</strong> one rotation direction with the cobalt region nearer."
+        : "<strong>Reading B:</strong> the opposite rotation direction with the cream region nearer.";
+      document.getElementById("reading").innerHTML = reading;
+    }
+
+    document.getElementById("play").addEventListener("click", () => {
+      playing = !playing;
+      previousTimestamp = null;
+      setPlaybackButton();
+      renderFrame(currentSeconds);
+    });
+
+    document.getElementById("restart").addEventListener("click", () => {
+      currentSeconds = 0;
+      previousTimestamp = null;
+      renderFrame(currentSeconds);
+    });
+
+    document.getElementById("interpretation").addEventListener("click", () => {
+      interpretation *= -1;
+      setInterpretationLabel();
+    });
+
+    function animationLoop(timestamp) {
+      if (previousTimestamp === null) previousTimestamp = timestamp;
+      const elapsed = Math.min((timestamp - previousTimestamp) / 1000, 0.1);
+      previousTimestamp = timestamp;
+      if (playing) renderFrame(currentSeconds + elapsed);
+      requestAnimationFrame(animationLoop);
+    }
+
+    function sampleParticle(index = 0, seconds = currentSeconds) {
+      const particle = materialParticles[clamp(Math.trunc(index), 0, materialParticles.length - 1)];
+      const viewPoint = worldPointToView(materialPointToWorld(particle, seconds));
+      const color = colorFromSignedViewDepth(viewPoint.z, depthExtent);
+      return {
+        id: particle.id,
+        material: { u: particle.u, v: particle.v, radius: particle.radius },
+        viewDepth: viewPoint.z,
+        palettePosition: color.position
+      };
+    }
+
+    async function setTime(seconds) {
+      playing = false;
+      previousTimestamp = null;
+      setPlaybackButton();
+      renderFrame(Number(seconds));
+      await new Promise(requestAnimationFrame);
+      return getState();
+    }
+
+    function getState() {
+      return {
+        timeSeconds: currentSeconds,
+        periodSeconds: SETTINGS.periodSeconds,
+        particleCount: materialParticles.length,
+        projection: "orthographic",
+        colorAttachment: "signed-view-depth",
+        playing,
+        interpretation
+      };
+    }
+
+    window.__ILLUSION_TEST__ = {
+      setTime,
+      renderFrame: setTime,
+      getState,
+      sampleParticle,
+      reset() {
+        playing = false;
+        interpretation = 1;
+        currentSeconds = 0;
+        previousTimestamp = null;
+        setPlaybackButton();
+        setInterpretationLabel();
+        renderFrame(0);
+        return getState();
+      },
+      getImageData() { return context.getImageData(0, 0, canvas.width, canvas.height); }
+    };
+
+    setPlaybackButton();
+    setInterpretationLabel();
+    renderFrame(0);
+    requestAnimationFrame(animationLoop);
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Kinetic Illusion Workbench"
+  short_description: "Build ambiguous rotating optical illusions"
+  brand_color: "#5EA9D8"
+  default_prompt: "Use $kinetic-illusion-workbench to turn my concept into a viewable rotating optical illusion. Check loop closure, then ask whether I perceive both spin directions."

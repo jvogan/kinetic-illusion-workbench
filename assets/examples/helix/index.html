@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><path d=%22M17 6c28 14 2 38 30 52M47 6C19 20 45 44 17 58%22 fill=%22none%22 stroke=%22%235ea9d8%22 stroke-width=%226%22/></svg>">
+<title>Ambiguous DNA/RNA helix</title>
+<style>
+  :root { --bg:#0b0b0d; --panel:#151519; --line:#2a2a31; --ink:#d7d7dd; --dim:#8b8b95;
+          --hot:#5ea9d8; --warn:#d8735e; --ok:#6fbf73; }
+  * { box-sizing:border-box; }
+  html { min-width:320px; color-scheme:dark; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .site-nav { display:flex; align-items:center; justify-content:space-between; gap:24px;
+              width:min(1100px,calc(100% - 28px)); margin:0 auto; padding:15px 0 13px;
+              border-bottom:1px solid var(--line); font-size:10px; letter-spacing:.1em;
+              text-transform:uppercase; }
+  .site-nav a { color:var(--dim); text-decoration:none; }
+  .site-nav a:hover,.site-nav a[aria-current="page"] { color:var(--ink); }
+  .site-mark { color:var(--hot)!important; letter-spacing:.16em; }
+  .site-links { display:flex; align-items:center; gap:26px; }
+  .site-links a { position:relative; padding:6px 0; white-space:nowrap; }
+  .site-links a[aria-current="page"]::after { position:absolute; right:0; bottom:0; left:0;
+                                               height:2px; content:""; background:var(--hot); }
+  #wrap { display:flex; align-items:flex-start; gap:14px; width:min(1100px,100%); margin:0 auto;
+          padding:14px; }
+  .visual { flex:0 1 600px; min-width:0; }
+  canvas { display:block; width:100%; height:auto; background:#000; border:1px solid var(--line); }
+  #panel { flex:1 1 400px; max-width:460px; max-height:calc(100vh - 28px);
+           overflow-y:auto; background:var(--panel); border:1px solid var(--line);
+           padding:10px 12px; }
+  h1 { font-size:13px; margin:0 0 8px; letter-spacing:.04em; text-transform:uppercase; }
+  h2 { font-size:11px; margin:14px 0 6px; color:var(--hot); letter-spacing:.08em;
+       text-transform:uppercase; border-top:1px solid var(--line); padding-top:8px; }
+  h2.danger { color:var(--warn); }
+  .row { display:grid; grid-template-columns:120px 1fr 56px; gap:8px; align-items:center;
+         margin:3px 0; }
+  .row label { color:var(--dim); font-size:11px; }
+  .row output { text-align:right; font-variant-numeric:tabular-nums; font-size:11px; }
+  input[type=range] { width:100%; accent-color:var(--hot); }
+  select, button { background:#1e1e24; color:var(--ink); border:1px solid var(--line);
+                   min-height:44px; padding:7px 10px; font:inherit; font-size:11px; }
+  button { cursor:pointer; } button:hover { border-color:var(--hot); }
+  button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible {
+    outline:2px solid #f0c878; outline-offset:3px;
+  }
+  .chk { display:flex; gap:6px; align-items:center; margin:4px 0; font-size:11px; color:var(--dim); }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+  pre { background:#0e0e12; border:1px solid var(--line); padding:8px; font-size:10.5px;
+        white-space:pre-wrap; margin:6px 0 0; max-height:150px; overflow:auto; color:var(--dim); }
+  .note { color:var(--dim); font-size:11px; margin:6px 0; }
+  #truth { font-size:12px; padding:6px 8px; border:1px solid var(--line); background:#0e0e12;
+           margin:6px 0; }
+  #truth b { color:var(--ok); }
+  .hud { color:var(--dim); font-size:11px; }
+  .visual-header { display:flex; justify-content:space-between; gap:16px; padding:8px 1px 10px;
+                   color:var(--dim); font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .visual-header strong { color:var(--hot); font-weight:600; }
+  .depth-key { display:flex; flex-wrap:wrap; gap:7px 18px; padding:9px 2px 2px;
+               color:var(--dim); font-size:10px; }
+  .depth-key b { color:var(--ink); font-weight:600; }
+  details.lab-controls { margin-top:10px; border-top:1px solid var(--line); }
+  details.lab-controls > summary { padding:10px 0; color:var(--hot); cursor:pointer;
+                                   font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+  .method-report { width:min(72ch,calc(100% - 28px)); margin:44px auto 72px; padding-top:28px;
+                   border-top:1px solid var(--line); font:16px/1.7 system-ui,sans-serif; }
+  .method-report h2 { margin:30px 0 8px; padding:0; border:0; color:var(--ink);
+                      font:600 1.45rem/1.25 system-ui,sans-serif; letter-spacing:0;
+                      text-transform:none; }
+  .method-report h2:first-child { margin-top:0; }
+  .method-report p { margin:0 0 14px; color:#c7c7cf; }
+  .method-report code { color:#f0c878; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .method-report a { color:#80bfe4; }
+  @media (max-width:900px) {
+    #wrap { flex-direction:column; }
+    .visual,#panel { width:100%; max-width:none; flex:auto; }
+    #panel { max-height:none; }
+    .site-nav { align-items:flex-start; }
+    .site-links { max-width:68vw; overflow-x:auto; overscroll-behavior-inline:contain; }
+  }
+  @media (max-width:560px) {
+    .site-nav { display:block; }
+    .site-links { max-width:100%; margin-top:9px; gap:20px; }
+    #wrap { padding:10px; }
+    .row { grid-template-columns:110px minmax(80px,1fr) 48px; gap:6px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav" aria-label="Kinetic Illusion Workbench">
+  <a class="site-mark" href="../index.html">Kinetic Illusion Workbench</a>
+  <div class="site-links">
+    <a href="../../starter/index.html">Starter</a>
+    <a href="../arrow/index.html">Arrow lab</a>
+    <a href="./index.html" aria-current="page">DNA/RNA helix</a>
+    <a href="#method-report">Method report</a>
+  </div>
+</nav>
+
+<main id="wrap">
+  <div class="visual">
+    <div class="visual-header"><span>Study 02 · Helix handedness</span><strong>Live view-depth coloring</strong></div>
+    <canvas id="cv" width="600" height="760" role="img" aria-label="A porous double helix rotates under orthographic projection. Its projected motion can be interpreted as either handedness rotating in the corresponding opposite direction."></canvas>
+    <div class="hud" id="hud">&nbsp;</div>
+    <div class="depth-key"><span><b>Cream / red / blue</b> are view-space depth zones.</span><span>Particles change color as they cross these zones.</span></div>
+  </div>
+  <div id="panel">
+    <h1>Ambiguous DNA/RNA helix</h1>
+    <div class="note">The same projected motion can represent opposite helix handedness and rotation
+      directions. Swap the interpretation label to compare both readings; the canvas pixels remain
+      unchanged. The renderer assigns each particle's color from signed view-space depth.</div>
+    <div id="truth" aria-live="polite"></div>
+    <div class="btns">
+      <button id="bflip">Swap interpretation label</button>
+      <button id="bplay">Pause</button>
+      <button id="brestart">Restart</button>
+    </div>
+    <div class="btns">
+      <button id="pB">Use B-DNA</button>
+      <button id="pA">Use A-form RNA duplex</button>
+      <button id="bcopy">Copy parameters</button>
+    </div>
+    <details class="lab-controls">
+      <summary>Advanced lab controls</summary>
+      <div id="controls"></div>
+      <h2>Current parameters</h2>
+      <pre id="dump"></pre>
+    </details>
+  </div>
+</main>
+
+<section class="method-report" id="method-report" aria-labelledby="method-report-title">
+  <h2 id="method-report-title">How the helix illusion works</h2>
+  <p>Each particle keeps a fixed position on the rotating helix. On every frame, the renderer projects the particle, reads its signed view-space depth, and samples the cream-to-red-to-blue ramp. The viewer-aligned field changes the particle's displayed color as it rotates.</p>
+
+  <h2>Why handedness can reverse</h2>
+  <p>Orthographic projection removes the sign of depth. A right-handed helix and its depth-reflected left-handed mirror can produce the same projected positions when their rotation directions are opposite. With signed view-depth color, pixel equality also requires reversing the interpreted depth-color polarity. The <b>Swap interpretation label</b> control updates the description while preserving the canvas pixels.</p>
+
+  <h2>Color rule</h2>
+  <p><code>t = clamp(0.5 - polarity × view_z / (2 × R_depth), 0, 1)</code></p>
+  <p><code>R_depth</code> is the maximum absolute view-space depth over every particle and a full revolution. The renderer keeps this scale fixed until the geometry or camera changes.</p>
+
+  <h2>Acceptance test</h2>
+  <p>Watch at least two complete turns. Try to perceive a right-handed helix rotating in one direction, then a left-handed helix rotating in the opposite direction. Use pixel comparison for geometric compatibility and viewer reports for perceptual reversal.</p>
+
+  <h2>Reference</h2>
+  <p>The helix applies the view-depth color rule measured from the rotating-arrow animation in <a href="https://x.com/RaminNasibov/status/2092384791899386278">Ramin Nasibov's reference post</a>.</p>
+</section>
+
+<script>
+"use strict";
+const TEST_MODE = new URLSearchParams(window.location.search).has("test");
+// ---------------------------------------------------------------------------
+// The embedded color ramp uses samples measured from the reference video. Its
+// parameter runs from the nearest cobalt region, through the narrow red tangent
+// band, to the farthest cream region. Samples at 3-degree intervals preserve the
+// transition. The fit has R² = 0.964 against sin(phi).
+// ---------------------------------------------------------------------------
+const RAMP_STOPS = [
+  [0.0737,39,68,162],[0.0879,39,68,162],[0.1033,39,68,162],[0.1198,40,69,163],
+  [0.1373,42,70,164],[0.1558,42,71,165],[0.1753,43,72,166],[0.1956,44,74,167],
+  [0.2168,45,75,167],[0.2388,46,76,167],[0.2614,53,78,166],[0.2847,66,81,162],
+  [0.3087,80,83,157],[0.3331,118,87,133],[0.3580,157,81,103],[0.3833,171,75,89],
+  [0.4089,187,69,74],[0.4347,189,70,78],[0.4608,188,71,70],[0.5131,178,86,77],
+  [0.5392,194,77,64],[0.5653,207,76,52],[0.5911,204,83,58],[0.6167,200,85,55],
+  [0.6420,194,90,59],[0.6669,188,97,64],[0.6913,184,106,73],[0.7153,182,116,84],
+  [0.7386,181,125,92],[0.7612,181,132,99],[0.7832,181,140,108],[0.8044,181,145,112],
+  [0.8247,180,150,119],[0.8442,180,153,122],[0.8627,180,157,127],[0.8802,180,159,129],
+  [0.8967,180,160,132],[0.9121,180,162,134],[0.9263,180,163,136],[0.9394,180,163,137],
+  [0.9513,180,164,138],[0.9619,180,164,139],[0.9713,180,164,140],[0.9794,180,164,140],
+  [0.9862,180,164,141],[0.9916,180,165,141],[0.9957,181,165,141],[0.9985,181,165,142],
+  [0.9998,181,165,142]
+];
+const RN = 512;
+let RAMP = new Float32Array(RN * 3);
+// The ramp endpoints have Rec.709 luma values of 166.9 and 68.5, a 2.44 ratio.
+// lumaEqualise rescales each entry toward constant Rec.709 luma while preserving
+// chromaticity. A value of 0 reproduces the measured ramp; 1 equalizes its luma.
+function buildRamp(lumaEq) {
+  const tmp = new Float32Array(RN * 3);
+  for (let i = 0; i < RN; i++) {
+    const t = i / (RN - 1);
+    let k = 0;
+    while (k < RAMP_STOPS.length - 2 && RAMP_STOPS[k + 1][0] < t) k++;
+    const a = RAMP_STOPS[k], b = RAMP_STOPS[k + 1];
+    const f = Math.max(0, Math.min(1, (t - a[0]) / Math.max(b[0] - a[0], 1e-9)));
+    for (let c = 0; c < 3; c++) tmp[i * 3 + c] = a[c + 1] + (b[c + 1] - a[c + 1]) * f;
+  }
+  if (lumaEq > 0) {
+    let lo = Infinity, hi = 0;
+    for (let i = 0; i < RN; i++) {
+      const L = 0.2126 * tmp[i*3] + 0.7152 * tmp[i*3+1] + 0.0722 * tmp[i*3+2];
+      if (L < lo) lo = L; if (L > hi) hi = L;
+    }
+    const target = Math.sqrt(lo * hi);
+    for (let i = 0; i < RN; i++) {
+      const L = 0.2126 * tmp[i*3] + 0.7152 * tmp[i*3+1] + 0.0722 * tmp[i*3+2];
+      const s = 1 + lumaEq * (target / Math.max(L, 1e-6) - 1);
+      for (let c = 0; c < 3; c++) tmp[i*3+c] = Math.min(255, Math.max(0, tmp[i*3+c] * s));
+    }
+  }
+  RAMP = tmp;
+}
+
+// ---------------------------------------------------------------------------
+// Parameters. Lengths are in angstroms and scaled to pixels on the way out, so
+// the nucleic-acid numbers stay recognizable: B-DNA is 10.5 bp/turn, 3.4 Å rise
+// per bp, 34 Å pitch, 20 Å diameter, strands offset ~240 deg (equivalently
+// 120 deg the other way round) which is what makes the major and minor grooves.
+// ---------------------------------------------------------------------------
+const PRESETS = {
+  B:   { hand: +1, turns: 3.5, riseA: 3.4, bpPerTurn: 10.5, radiusA: 10, phase: 240,
+         rungs: true, rungDots: 0.18 },
+  A:   { hand: +1, turns: 3.5, riseA: 2.548, bpPerTurn: 11.01, radiusA: 11.5, phase: 240,
+         rungs: true, rungDots: 0.18 }
+};
+const REF = Object.assign({
+  scale: 5.4,                 // px per angstrom
+  theta: 0, cx: 300, cy: 380,
+  degPerSec: 54, spin: 1,   // The default rotation rate is 0.15 rev/s.
+  nDots: 7000, dotRadius: 1.45, dotAA: 1.25, dotGain: 1.5, tubeA: 1.6,
+  // Every particle samples the viewer-aligned view-space depth field on each frame.
+  colormap: "depth", palettePolarity: 1, rampGain: 1.15, lumaEqualise: 0,
+  exposure: 0.9, background: 0,
+  bloom: 0.15, bloomRadius: 2, bloomThreshold: 70,
+  crossing: "sum",
+  marker: true, markerAt: 0.18, markerSizeA: 2.75,
+  endCaps: true, arrows: false,
+  projection: "ortho", fov: 30,
+  occlusion: false, depthSize: false, depthBright: false,
+  seed: 11
+}, PRESETS.B);
+let P = Object.assign({}, REF);
+
+// ---------------------------------------------------------------------------
+// Point generation. Everything lives in cylinder coordinates: u is azimuth, v
+// is axial position, and r is radius. Handedness enters as the sign that
+// multiplies the twist.
+// ---------------------------------------------------------------------------
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+let PU, PV, PR, PS;      // azimuth, axial px, radius px, strand id (0,1,2=rung,3=marker,4=arrow)
+function build(pp) {
+  const rand = mulberry32(pp.seed);
+  const S = pp.scale;
+  const L = pp.turns * pp.bpPerTurn * pp.riseA * S;   // total axial extent, px
+  const rad = pp.radiusA * S;
+  const tube = pp.tubeA * S;
+  const twist = pp.hand * pp.turns * 2 * Math.PI;
+  const dPhase = pp.phase * Math.PI / 180;
+
+  const u = [], v = [], r = [], sid = [];
+  const nRung = pp.rungs ? Math.max(Math.round(pp.turns * pp.bpPerTurn), 1) : 0;
+  const rungShare = pp.rungs ? pp.rungDots : 0;
+  const nBack = Math.round(pp.nDots * (1 - rungShare));
+  const perStrand = Math.round(nBack / 2);
+
+  for (let k = 0; k < 2; k++) {
+    for (let i = 0; i < perStrand; i++) {
+      let s = rand();
+      // End emphasis: sample extra particles near both termini so the viewer can
+      // track rotation instead of reading the helix as sliding along its axis.
+      if (pp.endCaps && rand() < 0.12) s = rand() < 0.5 ? rand() * 0.06 : 1 - rand() * 0.06;
+      const jr = (rand() * 2 - 1) * tube, ja = rand() * 2 * Math.PI;
+      u.push(twist * s + k * dPhase);
+      v.push((s - 0.5) * L + jr * Math.sin(ja));
+      r.push(rad + jr * Math.cos(ja));
+      sid.push(k);
+    }
+  }
+
+  if (nRung) {
+    const per = Math.max(Math.round(pp.nDots * rungShare / nRung), 1);
+    for (let i = 0; i < nRung; i++) {
+      const s = (i + 0.5) / nRung;
+      const u0 = twist * s, u1 = u0 + dPhase;
+      const ax = rad * Math.cos(u0), ay = rad * Math.sin(u0);
+      const bx = rad * Math.cos(u1), by = rad * Math.sin(u1);
+      for (let j = 0; j < per; j++) {
+        const f = rand();
+        const jr = (rand() * 2 - 1) * tube * 0.55;
+        const x = ax + (bx - ax) * f, y = ay + (by - ay) * f;
+        u.push(Math.atan2(y, x));
+        r.push(Math.hypot(x, y));
+        v.push((s - 0.5) * L + jr);
+        sid.push(2);
+      }
+    }
+  }
+
+  if (pp.marker) {
+    // An aperiodic marker distinguishes rotation from axial translation. On a
+    // screw-symmetric helix, those motions produce the same repeating pattern.
+    // Tangential +/- pairs keep the marker symmetric in view depth.
+    const s = pp.markerAt, ms = pp.markerSizeA * pp.scale;
+    const u0 = twist * s, v0 = (s - 0.5) * L;
+    const n = Math.round(pp.nDots * 0.05 / 2);
+    for (let i = 0; i < n; i++) {
+      let dr, dv, dt, d2;
+      do { dr = rand() * 2 - 1; dv = rand() * 2 - 1; dt = rand() * 2 - 1;
+           d2 = dr * dr + dv * dv + dt * dt; } while (d2 > 1);
+      const rr = rad + dr * ms, vv = v0 + dv * ms, du = dt * ms / Math.max(rr, 1e-6);
+      u.push(u0 + du); r.push(rr); v.push(vv); sid.push(3);
+      u.push(u0 - du); r.push(rr); v.push(vv); sid.push(3);
+    }
+  }
+
+  if (pp.arrows) {
+    // 5'->3' chevrons remain fixed to strand 0 in material space.
+    const n = 7;
+    for (let i = 0; i < n; i++) {
+      const s = 0.08 + 0.84 * i / (n - 1);
+      for (let j = 0; j < 90; j++) {
+        const t = (j / 89) * 2 - 1;                    // -1..1 across the chevron
+        const back = (1 - Math.abs(t)) * 0.030;        // trails behind in s
+        const ss = Math.min(Math.max(s - back, 0), 1);
+        const uu = twist * ss;
+        const off = t * 3.0 * pp.scale;
+        u.push(uu); r.push(rad + off * 0.0);
+        v.push((ss - 0.5) * L + off * 0.9); sid.push(4);
+      }
+    }
+  }
+
+  PU = Float32Array.from(u); PV = Float32Array.from(v);
+  PR = Float32Array.from(r); PS = Uint8Array.from(sid);
+  return { L: L };
+}
+let GEOM = build(P);
+
+// ---------------------------------------------------------------------------
+// Rasterizer. Separate strand accumulators let the crossing controls compare
+// additive, mean, and maximum coverage. Points use fixed size and brightness
+// with no depth sorting.
+// ---------------------------------------------------------------------------
+const CV = document.getElementById("cv"), CTX = CV.getContext("2d", {
+  alpha: false,
+  willReadFrequently: TEST_MODE
+});
+let W = CV.width, H = CV.height, NPX = W * H;
+const cA = new Float32Array(NPX * 3), wA = new Float32Array(NPX);
+const cB = new Float32Array(NPX * 3), wB = new Float32Array(NPX);
+const zb = new Float32Array(NPX);
+const OUT = new Float32Array(NPX * 3);
+const img = CTX.createImageData(W, H);
+const half = new Float32Array((W >> 1) * (H >> 1) * 3);
+const blurTmp = new Float32Array((W >> 1) * (H >> 1));
+
+function boxBlurRGB(buf, w, h, r, tmp) {
+  const k = 2 * r + 1;
+  for (let c = 0; c < 3; c++) {
+    for (let y = 0; y < h; y++) {
+      const o = y * w * 3 + c; let acc = 0;
+      for (let i = -r; i <= r; i++) acc += buf[o + Math.min(Math.max(i, 0), w - 1) * 3];
+      for (let x = 0; x < w; x++) {
+        tmp[x] = acc / k;
+        acc += buf[o + Math.min(x + r + 1, w - 1) * 3] - buf[o + Math.max(x - r, 0) * 3];
+      }
+      for (let x = 0; x < w; x++) buf[o + x * 3] = tmp[x];
+    }
+    for (let x = 0; x < w; x++) {
+      const o = x * 3 + c; let acc = 0;
+      for (let i = -r; i <= r; i++) acc += buf[o + Math.min(Math.max(i, 0), h - 1) * w * 3];
+      for (let y = 0; y < h; y++) {
+        tmp[y] = acc / k;
+        acc += buf[o + Math.min(y + r + 1, h - 1) * w * 3] - buf[o + Math.max(y - r, 0) * w * 3];
+      }
+      for (let y = 0; y < h; y++) buf[o + y * w * 3] = tmp[y];
+    }
+  }
+}
+
+function fullCycleDepthExtent(st, ct) {
+  let extent = 1;
+  for (let i = 0; i < PU.length; i++) {
+    extent = Math.max(extent, Math.abs(PR[i] * ct) + Math.abs(PV[i] * st));
+  }
+  return extent;
+}
+
+function renderTo(pp, tSec) {
+  cA.fill(0); wA.fill(0); cB.fill(0); wB.fill(0);
+  const occ = pp.occlusion;
+  const occSign = 1;
+  if (occ) zb.fill(-1e18);
+
+  const th = pp.theta * Math.PI / 180, st = Math.sin(th), ct = Math.cos(th);
+  const phi0 = pp.spin * pp.degPerSec * tSec * Math.PI / 180;
+  const persp = pp.projection === "persp";
+  const radPx = pp.radiusA * pp.scale;
+  const dist = radPx * 8 / Math.tan(Math.max(pp.fov, 1) * Math.PI / 360);
+  const aa = Math.max(pp.dotAA, 1e-3);
+  const n = PU.length;
+  const depthScale = fullCycleDepthExtent(st, ct);
+  const yTop = pp.cy - GEOM.L / 2 - 20, yBot = pp.cy + GEOM.L / 2 + 20;
+  const rg = pp.rampGain;
+  const split = pp.crossing !== "sum";
+
+  for (let i = 0; i < n; i++) {
+    const a = PU[i] + phi0, r = PR[i], v = PV[i];
+    const sa = Math.sin(a), ca = Math.cos(a);
+    let sx = r * ca, syUp = v * ct + r * sa * st;
+    const depth = -r * sa * ct + v * st;
+    if (persp) { const kk = dist / Math.max(dist - depth, 1e-3); sx *= kk; syUp *= kk; }
+    const x = pp.cx + sx, y = pp.cy - syUp;
+
+    let t;
+    switch (pp.colormap) {
+      case "turn_bands": {
+        // Repeat the source cream→red→blue field once per helical turn, but
+        // lock it to view-space rows. This creates horizontal bands across
+        // each turn without attaching a handedness-revealing depth label.
+        const pitchPx = Math.max(pp.riseA * pp.bpPerTurn * pp.scale * Math.abs(ct), 1);
+        const screenPhase = ((pp.cy - y) / pitchPx) * Math.PI * 2;
+        t = 0.5 * (Math.sin(screenPhase) + 1);
+        break;
+      }
+      case "abs_depth": {
+        // Unsigned distance from the view axis.  Even in depth, so at a crossing
+        // (x1 = x2 forces z2 = -z1) the two strands get |z2| = |z1| exactly and
+        // are painted identically -- zero separation by construction. It still
+        // recolors: |sin a| sweeps
+        // 0 -> 1 -> 0 -> 1, so a fleck crosses the whole palette twice per turn.
+        // The unsigned diagnostic maps maximum depth magnitude to cream,
+        // halfway to red, and the silhouette to blue.
+        const az = Math.min(Math.abs(r * sa * ct) / Math.max(radPx, 1e-6), 1);
+        t = 0.5 * (1 - Math.cos(Math.PI * az));
+        break;
+      }
+      case "screen_y": t = 1 - (y - yTop) / Math.max(yBot - yTop, 1); break;
+      case "depth":    t = 0.5 - (pp.palettePolarity || 1) * depth / (2 * depthScale); break;
+      case "sin_phi":  t = 0.5 * ((pp.palettePolarity || 1) * sa + 1); break;
+      case "rim":      t = 1 - Math.abs(sa * ct); break;
+      case "hybrid": {
+        const b = 1 - (y - yTop) / Math.max(yBot - yTop, 1);
+        t = b + 0.35 * (1 - Math.abs(sa * ct)) * (0.5 - b); break;
+      }
+      case "object_z": t = (v + GEOM.L / 2) / Math.max(GEOM.L, 1); break;
+      case "strand":   t = PS[i] === 1 ? 0.15 : PS[i] === 2 ? 0.5 : 0.9; break;
+      default: t = 1 - (y - yTop) / Math.max(yBot - yTop, 1);
+    }
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const ri = ((t * (RN - 1)) | 0) * 3;
+    let cr = RAMP[ri] * rg, cg = RAMP[ri + 1] * rg, cb = RAMP[ri + 2] * rg;
+
+    let bs = 1, rr = pp.dotRadius;
+    if (pp.depthBright) bs = 0.4 + 0.6 * (0.5 + depth / (2 * depthScale));
+    if (pp.depthSize) rr = pp.dotRadius * (0.5 + 1.0 * (0.5 + depth / (2 * depthScale)));
+
+    // strand 1 goes into the B accumulator when a crossing strategy needs the
+    // two strands kept apart; everything else goes into A
+    const toB = split && PS[i] === 1;
+    const cbuf = toB ? cB : cA, wbuf = toB ? wB : wA;
+
+    const xi = Math.round(x), yi = Math.round(y);
+    const rr2 = Math.max(Math.ceil(rr + aa), 1);
+    for (let dy = -rr2; dy <= rr2; dy++) {
+      const py = yi + dy; if (py < 0 || py >= H) continue;
+      for (let dx = -rr2; dx <= rr2; dx++) {
+        const px = xi + dx; if (px < 0 || px >= W) continue;
+        const ex = px - x, ey = py - y;
+        let w = (rr - Math.sqrt(ex * ex + ey * ey)) / aa + 0.5;
+        if (w <= 0) continue; if (w > 1) w = 1;
+        const q = py * W + px;
+        if (occ) {
+          const d = depth * occSign;
+          if (d < zb[q]) continue;
+          zb[q] = d;
+          cA[q * 3] = cr * w * bs; cA[q * 3 + 1] = cg * w * bs; cA[q * 3 + 2] = cb * w * bs;
+          wA[q] = w;
+        } else {
+          wbuf[q] += w;
+          cbuf[q * 3] += cr * w * bs;
+          cbuf[q * 3 + 1] += cg * w * bs;
+          cbuf[q * 3 + 2] += cb * w * bs;
+        }
+      }
+    }
+  }
+
+  // ---- combine the two strand accumulators ------------------------------
+  // "sum"  additive coverage, nothing kept apart.  The overlap is brighter.
+  // "mean" equal-density interleaving: where both strands are present each
+  //        contributes half, so the overlap has a single strand's density.
+  // "max"  symmetric alpha: the overlap looks exactly like one strand, and
+  //        the result is independent of which strand is drawn first.
+  const gain = pp.dotGain;
+  OUT.fill(0);
+  for (let q = 0; q < NPX; q++) {
+    let wv = wA[q], cr = cA[q * 3], cg = cA[q * 3 + 1], cb = cA[q * 3 + 2];
+    if (split) {
+      const wv2 = wB[q];
+      if (wv2 > 0) {
+        if (pp.crossing === "max") {
+          const m = Math.max(wv, wv2), tot = wv + wv2;
+          if (tot > 0) {
+            const f = m / tot;
+            cr = (cr + cB[q * 3]) * f; cg = (cg + cB[q * 3 + 1]) * f;
+            cb = (cb + cB[q * 3 + 2]) * f; wv = m;
+          }
+        } else {                       // mean
+          const f = wv > 0 ? 0.5 : 1;
+          cr = cr * f + cB[q * 3] * (wv > 0 ? 0.5 : 1);
+          cg = cg * f + cB[q * 3 + 1] * (wv > 0 ? 0.5 : 1);
+          cb = cb * f + cB[q * 3 + 2] * (wv > 0 ? 0.5 : 1);
+          wv = wv > 0 ? (wv + wv2) * 0.5 : wv2;
+        }
+      }
+    }
+    if (wv <= 0) continue;
+    // a z-buffered dot is opaque, so coverage IS alpha there; without this the
+    // occlusion mode is darker and the comparison is confounded
+    const alpha = (occ ? Math.min(wv, 1) : 1 - Math.exp(-gain * wv)) / wv;
+    OUT[q * 3] = cr * alpha; OUT[q * 3 + 1] = cg * alpha; OUT[q * 3 + 2] = cb * alpha;
+  }
+
+  if (pp.bloom > 0) {
+    const dw = W >> 1, dh = H >> 1, thr = pp.bloomThreshold;
+    for (let y = 0; y < dh; y++) for (let x = 0; x < dw; x++) {
+      const s = ((y * 2) * W + x * 2) * 3, d = (y * dw + x) * 3;
+      for (let c = 0; c < 3; c++) half[d + c] = Math.max(OUT[s + c] - thr, 0);
+    }
+    for (let k = 0; k < 3; k++) boxBlurRGB(half, dw, dh, pp.bloomRadius | 0, blurTmp);
+    for (let y = 0; y < H; y++) {
+      const sy = Math.min(y >> 1, dh - 1);
+      for (let x = 0; x < W; x++) {
+        const s = (sy * dw + Math.min(x >> 1, dw - 1)) * 3, d = (y * W + x) * 3;
+        OUT[d] += half[s] * pp.bloom; OUT[d + 1] += half[s + 1] * pp.bloom;
+        OUT[d + 2] += half[s + 2] * pp.bloom;
+      }
+    }
+  }
+  return OUT;
+}
+
+function present(buf, pp) {
+  const D = img.data, e = pp.exposure, bg = pp.background;
+  for (let q = 0; q < NPX; q++) {
+    let r = buf[q * 3] * e + bg, g = buf[q * 3 + 1] * e + bg, b = buf[q * 3 + 2] * e + bg;
+    D[q * 4] = r > 255 ? 255 : r < 0 ? 0 : r;
+    D[q * 4 + 1] = g > 255 ? 255 : g < 0 ? 0 : g;
+    D[q * 4 + 2] = b > 255 ? 255 : b < 0 ? 0 : b;
+    D[q * 4 + 3] = 255;
+  }
+  CTX.putImageData(img, 0, 0);
+}
+
+// ---------------------------------------------------------------------------
+// UI
+// ---------------------------------------------------------------------------
+const SPEC = [
+  ["h2", "Structure"],
+  ["turns", "Turns", 1, 10, 0.1],
+  ["bpPerTurn", "Base pairs per turn", 6, 16, 0.1],
+  ["riseA", "Rise per base pair (Å)", 2, 6, 0.05],
+  ["radiusA", "Radius (Å)", 4, 20, 0.25],
+  ["phase", "Strand phase offset (°)", 90, 270, 1],
+  ["tubeA", "Backbone thickness (Å)", 0.4, 5, 0.1],
+  ["scale", "Pixels per Å", 2, 10, 0.1],
+  ["chk", "rungs", "Base-pair rungs"],
+  ["rungDots", "Rung particle share", 0, 0.7, 0.01],
+  ["chk", "marker", "Aperiodic marker (bound ligand)"],
+  ["markerAt", "Marker position", 0, 1, 0.01],
+  ["markerSizeA", "Marker size (Å)", 1, 12, 0.25],
+  ["chk", "endCaps", "Emphasize both ends"],
+  ["chk", "arrows", "5′→3′ direction markers"],
+  ["h2", "View and motion"],
+  ["theta", "Camera elevation (°)", -45, 45, 0.5],
+  ["degPerSec", "Rotation speed (°/s)", 0, 180, 1],
+  ["h2", "Particles and color"],
+  ["nDots", "Particle count", 500, 30000, 100],
+  ["dotRadius", "Particle radius (px)", 0.4, 5, 0.05],
+  ["dotAA", "Edge softness", 0.2, 3, 0.1],
+  ["dotGain", "Particle opacity gain", 0.1, 6, 0.05],
+  // The view-depth color field is the default. The remaining modes are
+  // diagnostic controls for alternative color attachments.
+  ["sel", "colormap", "Color mode",
+   [["depth", "View-depth color field · default"],
+    ["abs_depth", "Unsigned view-depth magnitude · diagnostic"],
+    ["turn_bands", "Screen-locked turn bands · control"],
+    ["screen_y", "Screen-height gradient · diagnostic"],
+    ["rim", "Rim or grazing angle"],
+    ["object_z", "Axial position · material-fixed"],
+    ["hybrid", "Screen height plus rim"],
+    ["strand", "Per-strand color · identifies strands"],
+    ["sin_phi", "View azimuth · depth-related"]]],
+  ["sel", "crossing", "Crossing method",
+   [["sum", "Additive · unsorted"], ["mean", "Equal-density interleave"],
+    ["max", "Symmetric alpha · order-independent"]]],
+  ["rampGain", "Color ramp gain", 0.5, 2, 0.01],
+  ["lumaEqualise", "Equalize Rec.709 luma · bias control", 0, 1, 0.05],
+  ["exposure", "Exposure", 0.2, 2.5, 0.01],
+  ["bloom", "Bloom strength", 0, 3, 0.05],
+  ["bloomThreshold", "Bloom threshold", 0, 200, 5],
+  ["background", "Background luminance", 0, 60, 1],
+  ["h2 danger", "Depth-cue controls"],
+  ["sel", "projection", "Projection", [["ortho", "Orthographic"], ["persp", "Perspective"]]],
+  ["fov", "Perspective field of view", 5, 110, 1],
+  ["chk", "occlusion", "Z-buffer occlusion at crossings"],
+  ["chk", "depthSize", "Particle size varies with depth"],
+  ["chk", "depthBright", "Particle brightness varies with depth"]
+];
+
+const host = document.getElementById("controls"), outs = {};
+let needsRender = true;
+const REBUILD = ["turns", "bpPerTurn", "riseA", "radiusA", "phase", "tubeA", "scale",
+                 "nDots", "rungs", "rungDots", "marker", "markerAt", "markerSizeA",
+                 "endCaps", "arrows", "hand", "seed"];
+function changed(k) {
+  if (REBUILD.includes(k)) GEOM = build(P);
+  needsRender = true;
+  truth();
+  dump();
+}
+
+for (const s of SPEC) {
+  if (s[0].startsWith("h2")) {
+    const e = document.createElement("h2");
+    if (s[0].includes("danger")) e.className = "danger";
+    e.textContent = s[1]; host.appendChild(e); continue;
+  }
+  if (s[0] === "chk") {
+    const d = document.createElement("div"); d.className = "chk";
+    const i = document.createElement("input"); i.type = "checkbox"; i.id = "c_" + s[1];
+    i.checked = !!P[s[1]];
+    i.onchange = () => { P[s[1]] = i.checked; changed(s[1]); };
+    const l = document.createElement("label"); l.textContent = s[2]; l.htmlFor = i.id;
+    d.append(i, l); host.appendChild(d); outs[s[1]] = i; continue;
+  }
+  if (s[0] === "sel") {
+    const d = document.createElement("div"); d.className = "row";
+    const l = document.createElement("label"); l.textContent = s[2];
+    const sel = document.createElement("select"); sel.id = "control_" + s[1]; l.htmlFor = sel.id;
+    for (const [v, txt] of s[3]) {
+      const o = document.createElement("option"); o.value = v; o.textContent = txt; sel.appendChild(o);
+    }
+    sel.value = P[s[1]];
+    sel.onchange = () => { P[s[1]] = sel.value; changed(s[1]); };
+    d.append(l, sel, document.createElement("span")); host.appendChild(d);
+    outs[s[1]] = sel; continue;
+  }
+  const [key, label, lo, hi, step] = s;
+  const d = document.createElement("div"); d.className = "row";
+  const l = document.createElement("label"); l.textContent = label;
+  const r = document.createElement("input"); r.type = "range"; r.id = "control_" + key; l.htmlFor = r.id;
+  r.min = lo; r.max = hi; r.step = step; r.value = P[key];
+  const o = document.createElement("output"); o.textContent = P[key];
+  r.oninput = () => { P[key] = parseFloat(r.value); o.textContent = P[key];
+    if (key === "lumaEqualise") buildRamp(P.lumaEqualise);
+    changed(key); };
+  d.append(l, r, o); host.appendChild(d); outs[key] = { r, o };
+}
+
+function syncUI() {
+  for (const k in outs) {
+    const e = outs[k];
+    if (e instanceof HTMLInputElement) e.checked = !!P[k];
+    else if (e instanceof HTMLSelectElement) e.value = P[k];
+    else { e.r.value = P[k]; e.o.textContent = P[k]; }
+  }
+  truth(); dump();
+}
+let readingSign = 1;
+function truth() {
+  const readingHand = P.hand * readingSign;
+  const readingSpin = P.spin * readingSign;
+  const h = readingHand > 0 ? "RIGHT-handed" : "LEFT-handed";
+  const dir = readingSpin > 0 ? "counter-clockwise seen from above" : "clockwise seen from above";
+  const grooves = [Math.round(Math.abs(P.phase) % 360), 360 - Math.round(Math.abs(P.phase) % 360)]
+    .sort((a, b) => a - b);
+  document.getElementById("truth").innerHTML =
+    "Current interpretation label; pixels unchanged: <b>" + h + "</b>, turning " + dir +
+    ".<br>Groove angles: " + grooves[0] + "&deg; / " + grooves[1] + "&deg;." +
+    "<br>Alternate reading: <b>" + (readingHand > 0 ? "LEFT-handed" : "RIGHT-handed") +
+    "</b>, turning in the opposite direction.";
+}
+function dump() { document.getElementById("dump").textContent = JSON.stringify(P, null, 1); }
+
+for (const [id, key] of [["pB", "B"], ["pA", "A"]]) {
+  document.getElementById(id).onclick = () => {
+    Object.assign(P, PRESETS[key]); readingSign = 1; GEOM = build(P); needsRender = true; syncUI();
+  };
+}
+document.getElementById("bflip").onclick = () => { readingSign = -readingSign; truth(); };
+document.getElementById("bcopy").onclick = (e) => {
+  navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(P, null, 2));
+  e.target.textContent = "Copied"; setTimeout(() => e.target.textContent = "Copy parameters", 900);
+};
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+let playing = !reducedMotionQuery.matches;
+let tAcc = 0;
+document.getElementById("bplay").textContent = playing ? "Pause" : "Play";
+document.getElementById("bplay").onclick = (e) => {
+  playing = !playing; needsRender = true; last = performance.now();
+  e.target.textContent = playing ? "Pause" : "Play";
+};
+document.getElementById("brestart").onclick = () => {
+  tAcc = 0;
+  last = performance.now();
+  needsRender = true;
+};
+
+let last = performance.now(), fa = 0, fn = 0;
+function renderCurrentFrame() {
+  present(renderTo(P, tAcc), P);
+  document.getElementById("hud").textContent =
+    (playing ? "playing" : "paused") + "  |  " + PU.length + " particles  |  " + W + "x" + H +
+    "  |  turn " + (tAcc * P.degPerSec / 360).toFixed(2);
+  needsRender = false;
+}
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.1); last = now;
+  if (playing) {
+    tAcc += dt;
+    needsRender = true;
+  }
+  if (needsRender) {
+    renderCurrentFrame();
+    fa += dt;
+    fn++;
+  }
+  if (playing && fa > 0.5) {
+    document.getElementById("hud").textContent =
+      (fn / fa).toFixed(0) + " fps  |  " + PU.length + " particles  |  " + W + "x" + H +
+      "  |  turn " + (tAcc * P.degPerSec / 360).toFixed(2);
+    fa = 0; fn = 0;
+  }
+  requestAnimationFrame(loop);
+}
+
+reducedMotionQuery.addEventListener("change", (event) => {
+  if (event.matches) {
+    playing = false;
+    document.getElementById("bplay").textContent = "Play";
+    needsRender = true;
+  }
+});
+
+function getTestState() {
+  return {
+    timeSeconds: tAcc,
+    phaseRadians: P.spin * P.degPerSec * tAcc * Math.PI / 180,
+    colormap: P.colormap,
+    projection: P.projection,
+    particleCount: PU.length,
+    settings: Object.assign({}, P)
+  };
+}
+
+function sampleParticle(index = 0, seconds = tAcc) {
+  const i = Math.max(0, Math.min(PU.length - 1, Math.trunc(index)));
+  const th = P.theta * Math.PI / 180;
+  const st = Math.sin(th), ct = Math.cos(th);
+  const a = PU[i] + P.spin * P.degPerSec * seconds * Math.PI / 180;
+  const viewDepth = -PR[i] * Math.sin(a) * ct + PV[i] * st;
+  const depthScale = fullCycleDepthExtent(st, ct);
+  const palettePosition = Math.max(0, Math.min(1,
+    0.5 - (P.palettePolarity || 1) * viewDepth / (2 * depthScale)
+  ));
+  return {
+    index: i,
+    material: { azimuth: PU[i], axial: PV[i], radius: PR[i], strand: PS[i] },
+    viewDepth,
+    palettePosition
+  };
+}
+
+if (TEST_MODE) {
+  const setTime = async (seconds) => {
+    playing = false;
+    document.getElementById("bplay").textContent = "Play";
+    const period = 360 / Math.max(Math.abs(P.degPerSec), 1e-9);
+    tAcc = ((Number(seconds) % period) + period) % period;
+    last = performance.now();
+    renderCurrentFrame();
+    await new Promise(requestAnimationFrame);
+    return getTestState();
+  };
+  window.__ILLUSION_TEST__ = {
+    setTime,
+    renderFrame: setTime,
+    getState: getTestState,
+    sampleParticle,
+    getImageData() { return CTX.getImageData(0, 0, W, H); }
+  };
+}
+
+buildRamp(P.lumaEqualise); syncUI(); renderCurrentFrame(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>
